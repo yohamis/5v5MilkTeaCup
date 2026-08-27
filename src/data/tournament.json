@@ -3598,7 +3598,7 @@
             "deaths": 4,
             "assists": 9,
             "rating": 10.8,
-            "mvp": false,
+            "mvp": true,
             "fmvp": false,
             "tea": true,
             "treat": false
@@ -3634,7 +3634,7 @@
             "deaths": 2,
             "assists": 4,
             "rating": 10.6,
-            "mvp": true,
+            "mvp": false,
             "fmvp": false,
             "tea": true,
             "treat": false
