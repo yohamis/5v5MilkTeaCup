@@ -90,7 +90,7 @@
         ],
         "red": [
           {
-            "name": "阿鸿",
+            "name": "可乐",
             "lane": "打野",
             "kills": 2,
             "deaths": 7,
@@ -160,7 +160,7 @@
       "teams": {
         "blue": [
           {
-            "name": "阿鸿",
+            "name": "可乐",
             "lane": "辅助",
             "kills": 1,
             "deaths": 3,
@@ -354,7 +354,7 @@
         ],
         "red": [
           {
-            "name": "阿鸿",
+            "name": "可乐",
             "lane": "打野",
             "kills": 3,
             "deaths": 4,
