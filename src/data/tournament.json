@@ -4375,6 +4375,1062 @@
           }
         ]
       }
+    },
+    {
+      "id": "2026-08-28-a1",
+      "date": "2026-08-28",
+      "round": "A1",
+      "winner": "blue",
+      "teams": {
+        "blue": [
+          {
+            "name": "任哥",
+            "lane": "射手",
+            "kills": 3,
+            "deaths": 1,
+            "assists": 12,
+            "rating": 10.6,
+            "mvp": true,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "可乐",
+            "lane": "对抗",
+            "kills": 1,
+            "deaths": 2,
+            "assists": 6,
+            "rating": 6.8,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "坤哥",
+            "lane": "法师",
+            "kills": 6,
+            "deaths": 2,
+            "assists": 7,
+            "rating": 9.4,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "阿豪",
+            "lane": "打野",
+            "kills": 8,
+            "deaths": 1,
+            "assists": 8,
+            "rating": 10.3,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "婷姐",
+            "lane": "辅助",
+            "kills": 2,
+            "deaths": 2,
+            "assists": 10,
+            "rating": 6.8,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          }
+        ],
+        "red": [
+          {
+            "name": "快哥",
+            "lane": "射手",
+            "kills": 1,
+            "deaths": 6,
+            "assists": 3,
+            "rating": 4.2,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "阿特",
+            "lane": "对抗",
+            "kills": 3,
+            "deaths": 2,
+            "assists": 0,
+            "rating": 5.8,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "妮姐",
+            "lane": "法师",
+            "kills": 0,
+            "deaths": 4,
+            "assists": 1,
+            "rating": 3.3,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "Jack",
+            "lane": "打野",
+            "kills": 3,
+            "deaths": 4,
+            "assists": 1,
+            "rating": 6.6,
+            "mvp": false,
+            "fmvp": true,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "荣哥",
+            "lane": "辅助",
+            "kills": 1,
+            "deaths": 4,
+            "assists": 5,
+            "rating": 6.0,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "2026-08-28-a2",
+      "date": "2026-08-28",
+      "round": "A2",
+      "winner": "blue",
+      "teams": {
+        "blue": [
+          {
+            "name": "快哥",
+            "lane": "对抗",
+            "kills": 7,
+            "deaths": 5,
+            "assists": 12,
+            "rating": 10.0,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "Jack",
+            "lane": "法师",
+            "kills": 9,
+            "deaths": 1,
+            "assists": 12,
+            "rating": 13.9,
+            "mvp": true,
+            "fmvp": true,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "阿特",
+            "lane": "射手",
+            "kills": 2,
+            "deaths": 1,
+            "assists": 8,
+            "rating": 7.1,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "荣哥",
+            "lane": "打野",
+            "kills": 6,
+            "deaths": 4,
+            "assists": 9,
+            "rating": 9.3,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "妮姐",
+            "lane": "辅助",
+            "kills": 2,
+            "deaths": 4,
+            "assists": 20,
+            "rating": 11.4,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          }
+        ],
+        "red": [
+          {
+            "name": "可乐",
+            "lane": "对抗",
+            "kills": 2,
+            "deaths": 5,
+            "assists": 4,
+            "rating": 7.9,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "坤哥",
+            "lane": "法师",
+            "kills": 4,
+            "deaths": 4,
+            "assists": 7,
+            "rating": 8.8,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "任哥",
+            "lane": "射手",
+            "kills": 2,
+            "deaths": 6,
+            "assists": 8,
+            "rating": 8.8,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "阿豪",
+            "lane": "打野",
+            "kills": 3,
+            "deaths": 6,
+            "assists": 6,
+            "rating": 6.9,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "婷姐",
+            "lane": "辅助",
+            "kills": 4,
+            "deaths": 5,
+            "assists": 8,
+            "rating": 7.6,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "2026-08-28-a3",
+      "date": "2026-08-28",
+      "round": "A3",
+      "winner": "blue",
+      "teams": {
+        "blue": [
+          {
+            "name": "可乐",
+            "lane": "对抗",
+            "kills": 9,
+            "deaths": 5,
+            "assists": 11,
+            "rating": 9.7,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "坤哥",
+            "lane": "法师",
+            "kills": 6,
+            "deaths": 5,
+            "assists": 24,
+            "rating": 11.5,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "阿豪",
+            "lane": "射手",
+            "kills": 5,
+            "deaths": 7,
+            "assists": 12,
+            "rating": 7.9,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "任哥",
+            "lane": "打野",
+            "kills": 13,
+            "deaths": 6,
+            "assists": 15,
+            "rating": 12.8,
+            "mvp": true,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "婷姐",
+            "lane": "辅助",
+            "kills": 3,
+            "deaths": 6,
+            "assists": 21,
+            "rating": 8.7,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          }
+        ],
+        "red": [
+          {
+            "name": "快哥",
+            "lane": "对抗",
+            "kills": 12,
+            "deaths": 4,
+            "assists": 8,
+            "rating": 12.2,
+            "mvp": false,
+            "fmvp": true,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "Jack",
+            "lane": "法师",
+            "kills": 4,
+            "deaths": 8,
+            "assists": 11,
+            "rating": 7.8,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "阿特",
+            "lane": "射手",
+            "kills": 4,
+            "deaths": 7,
+            "assists": 13,
+            "rating": 6.7,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "荣哥",
+            "lane": "打野",
+            "kills": 6,
+            "deaths": 10,
+            "assists": 9,
+            "rating": 6.7,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "妮姐",
+            "lane": "辅助",
+            "kills": 2,
+            "deaths": 7,
+            "assists": 24,
+            "rating": 9.2,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "2026-08-28-a4",
+      "date": "2026-08-28",
+      "round": "A4",
+      "winner": "red",
+      "teams": {
+        "blue": [
+          {
+            "name": "快哥",
+            "lane": "射手",
+            "kills": 5,
+            "deaths": 4,
+            "assists": 2,
+            "rating": 10.0,
+            "mvp": false,
+            "fmvp": true,
+            "tea": false,
+            "treat": true
+          },
+          {
+            "name": "阿特",
+            "lane": "对抗",
+            "kills": 1,
+            "deaths": 5,
+            "assists": 5,
+            "rating": 5.6,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": true
+          },
+          {
+            "name": "Jack",
+            "lane": "法师",
+            "kills": 0,
+            "deaths": 6,
+            "assists": 6,
+            "rating": 7.0,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": true
+          },
+          {
+            "name": "荣哥",
+            "lane": "打野",
+            "kills": 7,
+            "deaths": 6,
+            "assists": 1,
+            "rating": 7.8,
+            "mvp": true,
+            "fmvp": false,
+            "tea": false,
+            "treat": true
+          },
+          {
+            "name": "妮姐",
+            "lane": "辅助",
+            "kills": 0,
+            "deaths": 7,
+            "assists": 5,
+            "rating": 4.7,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": true
+          }
+        ],
+        "red": [
+          {
+            "name": "可乐",
+            "lane": "射手",
+            "kills": 6,
+            "deaths": 3,
+            "assists": 14,
+            "rating": 9.9,
+            "mvp": false,
+            "fmvp": false,
+            "tea": true,
+            "treat": false
+          },
+          {
+            "name": "坤哥",
+            "lane": "对抗",
+            "kills": 4,
+            "deaths": 1,
+            "assists": 9,
+            "rating": 8.2,
+            "mvp": false,
+            "fmvp": false,
+            "tea": true,
+            "treat": false
+          },
+          {
+            "name": "任哥",
+            "lane": "法师",
+            "kills": 5,
+            "deaths": 6,
+            "assists": 14,
+            "rating": 10.0,
+            "mvp": false,
+            "fmvp": false,
+            "tea": true,
+            "treat": false
+          },
+          {
+            "name": "阿豪",
+            "lane": "打野",
+            "kills": 9,
+            "deaths": 1,
+            "assists": 11,
+            "rating": 11.4,
+            "mvp": false,
+            "fmvp": false,
+            "tea": true,
+            "treat": false
+          },
+          {
+            "name": "婷姐",
+            "lane": "辅助",
+            "kills": 4,
+            "deaths": 2,
+            "assists": 16,
+            "rating": 11.0,
+            "mvp": false,
+            "fmvp": false,
+            "tea": true,
+            "treat": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "2026-08-29-a1",
+      "date": "2026-08-29",
+      "round": "A1",
+      "winner": "blue",
+      "teams": {
+        "blue": [
+          {
+            "name": "荣哥",
+            "lane": "打野",
+            "kills": 1,
+            "deaths": 4,
+            "assists": 12,
+            "rating": 5.6,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "阿添",
+            "lane": "辅助",
+            "kills": 0,
+            "deaths": 0,
+            "assists": 18,
+            "rating": 10.7,
+            "mvp": true,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "婷姐",
+            "lane": "法师",
+            "kills": 2,
+            "deaths": 0,
+            "assists": 11,
+            "rating": 7.5,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "快哥",
+            "lane": "射手",
+            "kills": 10,
+            "deaths": 3,
+            "assists": 4,
+            "rating": 10.3,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "佳成",
+            "lane": "对抗",
+            "kills": 8,
+            "deaths": 3,
+            "assists": 3,
+            "rating": 10.2,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          }
+        ],
+        "red": [
+          {
+            "name": "阿豪",
+            "lane": "打野",
+            "kills": 5,
+            "deaths": 4,
+            "assists": 3,
+            "rating": 7.7,
+            "mvp": false,
+            "fmvp": true,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "阿标",
+            "lane": "辅助",
+            "kills": 2,
+            "deaths": 4,
+            "assists": 4,
+            "rating": 5.3,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "妮姐",
+            "lane": "法师",
+            "kills": 1,
+            "deaths": 4,
+            "assists": 6,
+            "rating": 4.9,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "Jack",
+            "lane": "射手",
+            "kills": 1,
+            "deaths": 5,
+            "assists": 6,
+            "rating": 7.4,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "阿胜",
+            "lane": "对抗",
+            "kills": 1,
+            "deaths": 4,
+            "assists": 4,
+            "rating": 4.3,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "2026-08-29-a2",
+      "date": "2026-08-29",
+      "round": "A2",
+      "winner": "red",
+      "teams": {
+        "blue": [
+          {
+            "name": "佳成",
+            "lane": "打野",
+            "kills": 5,
+            "deaths": 3,
+            "assists": 3,
+            "rating": 8.2,
+            "mvp": false,
+            "fmvp": true,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "阿添",
+            "lane": "辅助",
+            "kills": 0,
+            "deaths": 7,
+            "assists": 4,
+            "rating": 3.7,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "婷姐",
+            "lane": "法师",
+            "kills": 2,
+            "deaths": 5,
+            "assists": 3,
+            "rating": 6.6,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "快哥",
+            "lane": "射手",
+            "kills": 2,
+            "deaths": 5,
+            "assists": 3,
+            "rating": 5.6,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "荣哥",
+            "lane": "对抗",
+            "kills": 0,
+            "deaths": 2,
+            "assists": 2,
+            "rating": 6.8,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          }
+        ],
+        "red": [
+          {
+            "name": "阿豪",
+            "lane": "打野",
+            "kills": 1,
+            "deaths": 1,
+            "assists": 9,
+            "rating": 6.2,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "妮姐",
+            "lane": "辅助",
+            "kills": 4,
+            "deaths": 3,
+            "assists": 17,
+            "rating": 11.1,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "Jack",
+            "lane": "法师",
+            "kills": 3,
+            "deaths": 1,
+            "assists": 5,
+            "rating": 7.5,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "阿标",
+            "lane": "射手",
+            "kills": 14,
+            "deaths": 2,
+            "assists": 6,
+            "rating": 14.2,
+            "mvp": true,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "阿胜",
+            "lane": "对抗",
+            "kills": 0,
+            "deaths": 2,
+            "assists": 7,
+            "rating": 7.2,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "2026-08-29-a3",
+      "date": "2026-08-29",
+      "round": "A3",
+      "winner": "red",
+      "teams": {
+        "blue": [
+          {
+            "name": "佳成",
+            "lane": "打野",
+            "kills": 11,
+            "deaths": 9,
+            "assists": 7,
+            "rating": 8.2,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "阿添",
+            "lane": "辅助",
+            "kills": 3,
+            "deaths": 5,
+            "assists": 18,
+            "rating": 10.0,
+            "mvp": false,
+            "fmvp": true,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "婷姐",
+            "lane": "法师",
+            "kills": 3,
+            "deaths": 7,
+            "assists": 12,
+            "rating": 6.8,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "快哥",
+            "lane": "射手",
+            "kills": 9,
+            "deaths": 7,
+            "assists": 9,
+            "rating": 8.6,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "荣哥",
+            "lane": "对抗",
+            "kills": 4,
+            "deaths": 9,
+            "assists": 11,
+            "rating": 6.9,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          }
+        ],
+        "red": [
+          {
+            "name": "阿豪",
+            "lane": "打野",
+            "kills": 14,
+            "deaths": 5,
+            "assists": 8,
+            "rating": 11.6,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "妮姐",
+            "lane": "辅助",
+            "kills": 1,
+            "deaths": 7,
+            "assists": 23,
+            "rating": 7.7,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "Jack",
+            "lane": "法师",
+            "kills": 11,
+            "deaths": 5,
+            "assists": 10,
+            "rating": 12.0,
+            "mvp": true,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "阿标",
+            "lane": "射手",
+            "kills": 3,
+            "deaths": 6,
+            "assists": 10,
+            "rating": 6.4,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          },
+          {
+            "name": "阿胜",
+            "lane": "对抗",
+            "kills": 7,
+            "deaths": 7,
+            "assists": 8,
+            "rating": 8.4,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "2026-08-29-a4",
+      "date": "2026-08-29",
+      "round": "A4",
+      "winner": "red",
+      "teams": {
+        "blue": [
+          {
+            "name": "阿豪",
+            "lane": "打野",
+            "kills": 2,
+            "deaths": 3,
+            "assists": 0,
+            "rating": 4.3,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": true
+          },
+          {
+            "name": "妮姐",
+            "lane": "辅助",
+            "kills": 1,
+            "deaths": 5,
+            "assists": 4,
+            "rating": 5.3,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": true
+          },
+          {
+            "name": "Jack",
+            "lane": "法师",
+            "kills": 1,
+            "deaths": 5,
+            "assists": 3,
+            "rating": 7.6,
+            "mvp": false,
+            "fmvp": true,
+            "tea": false,
+            "treat": true
+          },
+          {
+            "name": "阿标",
+            "lane": "射手",
+            "kills": 2,
+            "deaths": 2,
+            "assists": 2,
+            "rating": 5.3,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": true
+          },
+          {
+            "name": "阿胜",
+            "lane": "对抗",
+            "kills": 0,
+            "deaths": 4,
+            "assists": 1,
+            "rating": 4.0,
+            "mvp": false,
+            "fmvp": false,
+            "tea": false,
+            "treat": true
+          }
+        ],
+        "red": [
+          {
+            "name": "佳成",
+            "lane": "打野",
+            "kills": 3,
+            "deaths": 2,
+            "assists": 7,
+            "rating": 8.1,
+            "mvp": false,
+            "fmvp": false,
+            "tea": true,
+            "treat": false
+          },
+          {
+            "name": "阿添",
+            "lane": "辅助",
+            "kills": 1,
+            "deaths": 0,
+            "assists": 16,
+            "rating": 12.0,
+            "mvp": false,
+            "fmvp": false,
+            "tea": true,
+            "treat": false
+          },
+          {
+            "name": "婷姐",
+            "lane": "法师",
+            "kills": 2,
+            "deaths": 1,
+            "assists": 4,
+            "rating": 6.0,
+            "mvp": false,
+            "fmvp": false,
+            "tea": true,
+            "treat": false
+          },
+          {
+            "name": "快哥",
+            "lane": "射手",
+            "kills": 10,
+            "deaths": 1,
+            "assists": 7,
+            "rating": 14.5,
+            "mvp": true,
+            "fmvp": false,
+            "tea": true,
+            "treat": false
+          },
+          {
+            "name": "荣哥",
+            "lane": "对抗",
+            "kills": 3,
+            "deaths": 2,
+            "assists": 2,
+            "rating": 6.6,
+            "mvp": false,
+            "fmvp": false,
+            "tea": true,
+            "treat": false
+          }
+        ]
+      }
     }
   ]
 }
