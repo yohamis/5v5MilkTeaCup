@@ -173,9 +173,10 @@ async function loadJson(event) {
             <article class="captain-card loser-captain" data-side="red">
               <div class="captain-crown">♜</div>
               <div class="captain-copy">
-                <small>败方队长 · 当日 FMVP 优先</small>
+                <small>败方队长 · {{ stats.captainSelection.loserRule === 'rating' ? '当日评分优先' : '当日 FMVP 优先' }}</small>
                 <h3>{{ stats.captainSelection.loserCaptain.name }}</h3>
-                <p>当日 FMVP {{ stats.captainSelection.loserCaptain.fmvp }} 次，当日积分 {{ stats.captainSelection.loserCaptain.powerScore.toFixed(2) }}</p>
+                <p v-if="stats.captainSelection.loserRule === 'rating'">最高 MVP {{ stats.captainSelection.loserMaxMvp }} 次 ≥ 最高 FMVP {{ stats.captainSelection.loserMaxFmvp }} 次，按当日均分评选</p>
+                <p v-else>当日 FMVP {{ stats.captainSelection.loserCaptain.fmvp }} 次，当日均分 {{ stats.captainSelection.loserCaptain.avgRating.toFixed(1) }}</p>
               </div>
               <div class="captain-stats">
                 <span><small>当日 FMVP</small><b>{{ stats.captainSelection.loserCaptain.fmvp }}</b></span>
@@ -188,7 +189,7 @@ async function loadJson(event) {
 
           <div class="captain-rules">
             <span><b>胜方规则</b> 当日 MVP 次数 → 当日积分 → 当日平均评分</span>
-            <span><b>败方规则</b> 当日 FMVP 次数 → 当日积分 → 当日平均评分</span>
+            <span><b>败方规则</b> 最高 MVP ≥ 最高 FMVP 时按平均评分；否则 FMVP 次数 → 平均评分</span>
           </div>
         </section>
 
