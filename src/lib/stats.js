@@ -147,19 +147,15 @@ export function calculateStats(data) {
     }
     const datePlayers = [...datePlayerMap.values()].map(finalize)
 
-    // 胜方队长：仅看最近比赛日的 MVP 次数、当日积分与当日平均评分。
+    // 队长统一规则：当日 MVP+FMVP 总次数、MVP 次数、当日平均评分。
     const winnerCandidates = [...datePlayers].sort(
-      (a, b) => b.mvp - a.mvp || b.powerScore - a.powerScore || b.avgRating - a.avgRating,
+      (a, b) =>
+        b.mvp + b.fmvp - (a.mvp + a.fmvp) || b.mvp - a.mvp || b.avgRating - a.avgRating,
     )
-    // 败方队长：当日最高 MVP 次数大于等于最高 FMVP 次数时看平均评分，否则优先 FMVP。
     const loserPool = datePlayers.filter((player) => player.name !== winnerCandidates[0]?.name)
-    const loserMaxMvp = Math.max(0, ...loserPool.map((player) => player.mvp))
-    const loserMaxFmvp = Math.max(0, ...loserPool.map((player) => player.fmvp))
-    const loserRule = loserMaxMvp >= loserMaxFmvp ? 'rating' : 'fmvp'
-    const loserCandidates = [...loserPool].sort((a, b) =>
-      loserRule === 'rating'
-        ? b.avgRating - a.avgRating || b.powerScore - a.powerScore || b.fmvp - a.fmvp
-        : b.fmvp - a.fmvp || b.avgRating - a.avgRating || b.powerScore - a.powerScore,
+    const loserCandidates = [...loserPool].sort(
+      (a, b) =>
+        b.mvp + b.fmvp - (a.mvp + a.fmvp) || b.mvp - a.mvp || b.avgRating - a.avgRating,
     )
 
     captainSelection = {
@@ -167,9 +163,6 @@ export function calculateStats(data) {
       sourceMatchCount: matches.filter((match) => match.date === sourceDate).length,
       winnerCaptain: winnerCandidates[0],
       loserCaptain: loserCandidates[0],
-      loserRule,
-      loserMaxMvp,
-      loserMaxFmvp,
       winnerCandidates,
       loserCandidates,
     }

@@ -4535,7 +4535,7 @@
             "assists": 12,
             "rating": 13.9,
             "mvp": true,
-            "fmvp": true,
+            "fmvp": false,
             "tea": false,
             "treat": false
           },
@@ -4597,7 +4597,7 @@
             "assists": 7,
             "rating": 8.8,
             "mvp": false,
-            "fmvp": false,
+            "fmvp": true,
             "tea": false,
             "treat": false
           },
@@ -4822,7 +4822,7 @@
             "deaths": 6,
             "assists": 1,
             "rating": 7.8,
-            "mvp": true,
+            "mvp": false,
             "fmvp": false,
             "tea": false,
             "treat": true
@@ -4884,7 +4884,7 @@
             "deaths": 1,
             "assists": 11,
             "rating": 11.4,
-            "mvp": false,
+            "mvp": true,
             "fmvp": false,
             "tea": true,
             "treat": false
@@ -4905,8 +4905,8 @@
       }
     },
     {
-      "id": "2026-08-29-a1",
-      "date": "2026-08-29",
+      "id": "2026-08-30-a1",
+      "date": "2026-08-30",
       "round": "A1",
       "winner": "blue",
       "teams": {
@@ -5037,14 +5037,14 @@
       }
     },
     {
-      "id": "2026-08-29-a2",
-      "date": "2026-08-29",
+      "id": "2026-08-30-a2",
+      "date": "2026-08-30",
       "round": "A2",
       "winner": "red",
       "teams": {
         "blue": [
           {
-            "name": "佳成",
+            "name": "阿豪",
             "lane": "打野",
             "kills": 5,
             "deaths": 3,
@@ -5056,7 +5056,7 @@
             "treat": false
           },
           {
-            "name": "阿添",
+            "name": "妮姐",
             "lane": "辅助",
             "kills": 0,
             "deaths": 7,
@@ -5068,7 +5068,7 @@
             "treat": false
           },
           {
-            "name": "婷姐",
+            "name": "Jack",
             "lane": "法师",
             "kills": 2,
             "deaths": 5,
@@ -5080,7 +5080,7 @@
             "treat": false
           },
           {
-            "name": "快哥",
+            "name": "阿标",
             "lane": "射手",
             "kills": 2,
             "deaths": 5,
@@ -5092,7 +5092,7 @@
             "treat": false
           },
           {
-            "name": "荣哥",
+            "name": "阿胜",
             "lane": "对抗",
             "kills": 0,
             "deaths": 2,
@@ -5106,7 +5106,7 @@
         ],
         "red": [
           {
-            "name": "阿豪",
+            "name": "佳成",
             "lane": "打野",
             "kills": 1,
             "deaths": 1,
@@ -5118,7 +5118,7 @@
             "treat": false
           },
           {
-            "name": "妮姐",
+            "name": "阿添",
             "lane": "辅助",
             "kills": 4,
             "deaths": 3,
@@ -5130,7 +5130,7 @@
             "treat": false
           },
           {
-            "name": "Jack",
+            "name": "婷姐",
             "lane": "法师",
             "kills": 3,
             "deaths": 1,
@@ -5142,7 +5142,7 @@
             "treat": false
           },
           {
-            "name": "阿标",
+            "name": "快哥",
             "lane": "射手",
             "kills": 14,
             "deaths": 2,
@@ -5154,7 +5154,7 @@
             "treat": false
           },
           {
-            "name": "阿胜",
+            "name": "荣哥",
             "lane": "对抗",
             "kills": 0,
             "deaths": 2,
@@ -5169,8 +5169,8 @@
       }
     },
     {
-      "id": "2026-08-29-a3",
-      "date": "2026-08-29",
+      "id": "2026-08-30-a3",
+      "date": "2026-08-30",
       "round": "A3",
       "winner": "red",
       "teams": {
@@ -5301,8 +5301,8 @@
       }
     },
     {
-      "id": "2026-08-29-a4",
-      "date": "2026-08-29",
+      "id": "2026-08-30-a4",
+      "date": "2026-08-30",
       "round": "A4",
       "winner": "red",
       "teams": {

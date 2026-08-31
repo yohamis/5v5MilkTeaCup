@@ -156,13 +156,13 @@ async function loadJson(event) {
             <article class="captain-card winner-captain" data-side="blue">
               <div class="captain-crown">♛</div>
               <div class="captain-copy">
-                <small>胜方队长 · 当日 MVP 优先</small>
+                <small>胜方队长 · 当日荣誉次数优先</small>
                 <h3>{{ stats.captainSelection.winnerCaptain.name }}</h3>
-                <p>当日 MVP {{ stats.captainSelection.winnerCaptain.mvp }} 次，当日积分 {{ stats.captainSelection.winnerCaptain.powerScore.toFixed(2) }}</p>
+                <p>当日 MVP+FMVP {{ stats.captainSelection.winnerCaptain.mvp + stats.captainSelection.winnerCaptain.fmvp }} 次，MVP {{ stats.captainSelection.winnerCaptain.mvp }} 次</p>
               </div>
               <div class="captain-stats">
+                <span><small>荣誉次数</small><b>{{ stats.captainSelection.winnerCaptain.mvp + stats.captainSelection.winnerCaptain.fmvp }}</b></span>
                 <span><small>当日 MVP</small><b>{{ stats.captainSelection.winnerCaptain.mvp }}</b></span>
-                <span><small>当日积分</small><b>{{ stats.captainSelection.winnerCaptain.powerScore.toFixed(2) }}</b></span>
                 <span><small>当日均分</small><b>{{ stats.captainSelection.winnerCaptain.avgRating.toFixed(1) }}</b></span>
               </div>
               <button type="button" @click="openPlayer(stats.captainSelection.winnerCaptain.name)">查看队长战绩 →</button>
@@ -173,14 +173,13 @@ async function loadJson(event) {
             <article class="captain-card loser-captain" data-side="red">
               <div class="captain-crown">♜</div>
               <div class="captain-copy">
-                <small>败方队长 · {{ stats.captainSelection.loserRule === 'rating' ? '当日评分优先' : '当日 FMVP 优先' }}</small>
+                <small>败方队长 · 当日荣誉次数优先</small>
                 <h3>{{ stats.captainSelection.loserCaptain.name }}</h3>
-                <p v-if="stats.captainSelection.loserRule === 'rating'">最高 MVP {{ stats.captainSelection.loserMaxMvp }} 次 ≥ 最高 FMVP {{ stats.captainSelection.loserMaxFmvp }} 次，按当日均分评选</p>
-                <p v-else>当日 FMVP {{ stats.captainSelection.loserCaptain.fmvp }} 次，当日均分 {{ stats.captainSelection.loserCaptain.avgRating.toFixed(1) }}</p>
+                <p>当日 MVP+FMVP {{ stats.captainSelection.loserCaptain.mvp + stats.captainSelection.loserCaptain.fmvp }} 次，MVP {{ stats.captainSelection.loserCaptain.mvp }} 次</p>
               </div>
               <div class="captain-stats">
-                <span><small>当日 FMVP</small><b>{{ stats.captainSelection.loserCaptain.fmvp }}</b></span>
-                <span><small>当日积分</small><b>{{ stats.captainSelection.loserCaptain.powerScore.toFixed(2) }}</b></span>
+                <span><small>荣誉次数</small><b>{{ stats.captainSelection.loserCaptain.mvp + stats.captainSelection.loserCaptain.fmvp }}</b></span>
+                <span><small>当日 MVP</small><b>{{ stats.captainSelection.loserCaptain.mvp }}</b></span>
                 <span><small>当日均分</small><b>{{ stats.captainSelection.loserCaptain.avgRating.toFixed(1) }}</b></span>
               </div>
               <button type="button" @click="openPlayer(stats.captainSelection.loserCaptain.name)">查看队长战绩 →</button>
@@ -188,8 +187,8 @@ async function loadJson(event) {
           </div>
 
           <div class="captain-rules">
-            <span><b>胜方规则</b> 当日 MVP 次数 → 当日积分 → 当日平均评分</span>
-            <span><b>败方规则</b> 最高 MVP ≥ 最高 FMVP 时按平均评分；否则 FMVP 次数 → 平均评分</span>
+            <span><b>胜方规则</b> 当日 MVP+FMVP 次数 → MVP 次数 → 当日平均评分</span>
+            <span><b>败方规则</b> 当日 MVP+FMVP 次数 → MVP 次数 → 当日平均评分</span>
           </div>
         </section>
 
