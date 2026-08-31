@@ -152,7 +152,18 @@ export function calculateStats(data) {
       (a, b) =>
         b.mvp + b.fmvp - (a.mvp + a.fmvp) || b.mvp - a.mvp || b.avgRating - a.avgRating,
     )
-    const loserPool = datePlayers.filter((player) => player.name !== winnerCandidates[0]?.name)
+    // 两位队长必须来自最近一局的不同队伍；红蓝方互换时仍按该局实际阵容判断。
+    const winnerCaptainSide = ['blue', 'red'].find((side) =>
+      latestMatch.teams[side].some((player) => player.name === winnerCandidates[0]?.name),
+    )
+    const opponentSide = winnerCaptainSide === 'blue' ? 'red' : winnerCaptainSide === 'red' ? 'blue' : null
+    const opponentNames = opponentSide
+      ? new Set(latestMatch.teams[opponentSide].map((player) => player.name))
+      : null
+    const loserPool = datePlayers.filter(
+      (player) =>
+        player.name !== winnerCandidates[0]?.name && (!opponentNames || opponentNames.has(player.name)),
+    )
     const loserCandidates = [...loserPool].sort(
       (a, b) =>
         b.mvp + b.fmvp - (a.mvp + a.fmvp) || b.mvp - a.mvp || b.avgRating - a.avgRating,
@@ -163,6 +174,9 @@ export function calculateStats(data) {
       sourceMatchCount: matches.filter((match) => match.date === sourceDate).length,
       winnerCaptain: winnerCandidates[0],
       loserCaptain: loserCandidates[0],
+      referenceMatchId: latestMatch.id,
+      winnerCaptainSide,
+      loserCaptainSide: opponentSide,
       winnerCandidates,
       loserCandidates,
     }

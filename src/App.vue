@@ -188,7 +188,7 @@ async function loadJson(event) {
 
           <div class="captain-rules">
             <span><b>胜方规则</b> 当日 MVP+FMVP 次数 → MVP 次数 → 当日平均评分</span>
-            <span><b>败方规则</b> 当日 MVP+FMVP 次数 → MVP 次数 → 当日平均评分</span>
+            <span><b>败方规则</b> 同一排序规则，且必须来自最近一局的另一支队伍</span>
           </div>
         </section>
 
