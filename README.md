@@ -1,12 +1,11 @@
 # 王者荣耀 5V5 奶茶杯
 
-单页 Vue 赛事数据台。历史对战、五路平均分 Top 3、MVP / FMVP、品茶大师 / 大善人和选手实力评分均从原始比赛 JSON 自动计算。
+Vue 赛事数据台 + Laravel/SQLite 后端。支持历史数据、自动排行榜、比赛数据导入修改，以及玩家每日自助报名。
 
 首页还会根据最近一个比赛日期的全部对局，自动推选下一场两名队长。更早日期的历史数据不会参与：
 
-- 胜方队长：当日 MVP 次数优先，同次数依次比较当日实力积分、当日平均评分。
-- 败方队长：当日 FMVP 次数优先，同次数依次比较当日实力积分、当日平均评分。
-- 两名队长不会选到同一名玩家。
+- 两位队长统一按：当日 MVP+FMVP 总次数、MVP 次数、当日平均评分排序。
+- 两名队长以最近一局阵容为准，必须来自不同队伍。
 
 ## 使用
 
@@ -15,15 +14,43 @@ npm install
 npm run dev
 ```
 
+后端首次启动：
+
+```powershell
+cd backend
+copy .env.example .env
+php artisan key:generate
+php artisan migrate
+php artisan tournament:import ..\src\data\tournament.json
+php artisan serve
+```
+
+前端复制根目录 `.env.example` 为 `.env.local`，设置 `VITE_API_BASE_URL`。未设置时自动继续读取静态 JSON。
+
+玩家通过“昵称 + 4—12 位数字 PIN”登录。历史玩家首次登录会设置自己的 PIN；新玩家勾选“第一次参加”即可创建档案并报名。
+
+网页的“赛事管理”页面可以保存管理员密钥、创建报名场次、上传完整 JSON，以及选择单场比赛编辑并保存。密钥仅保存在当前浏览器，后端仍会用 `.env` 中的 `TOURNAMENT_ADMIN_KEY` 校验每次管理请求。
+
+对应管理员接口：
+
+- `POST /api/admin/tournament/import`：导入完整 JSON
+- `PUT /api/admin/matches/{比赛ID}`：修改单场比赛
+- `DELETE /api/admin/matches/{比赛ID}`：删除比赛
+- `POST /api/admin/events`：创建每日报名场次
+- `PATCH /api/admin/events/{id}`：修改报名场次
+- `PATCH /api/admin/players/{id}`：修改玩家
+
 生产构建：
 
 ```powershell
 npm run build
 ```
 
+GitHub Pages 只能运行 Vue 静态页面，Laravel 后端需要部署到支持 PHP 8.3 且有持久磁盘的服务器。后端上线后，在 GitHub 仓库 `Settings → Secrets and variables → Actions → Variables` 新增 `VITE_API_BASE_URL`，值填后端地址（例如 `https://api.example.com`）；下一次 Actions 构建会自动接入报名和管理功能。
+
 ## 后续更新数据
 
-日常只需替换 `src/data/tournament.json`，不要手工维护任何排行榜。页面顶部也可以临时载入一个 JSON 文件进行预览。
+启用 Laravel 后端后，通过管理 API 上传或修改比赛即可，排行榜会自动更新。`src/data/tournament.json` 继续作为初始数据和静态站点降级备份；页面顶部也可以临时载入 JSON 预览。
 
 每场比赛的推荐格式：
 

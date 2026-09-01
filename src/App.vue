@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import initialData from './data/tournament.json'
 import { calculateStats, formatDate, formatPercent, LANES, validateData } from './lib/stats'
 
@@ -11,6 +11,21 @@ const matchDateFilter = ref('全部')
 const boardType = ref('honor')
 const teaBoardType = ref('tea')
 const selectedPlayerName = ref('')
+const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
+const signupEvents = ref([])
+const signupMessage = ref('')
+const signupLoading = ref(false)
+const storedPlayerSession = localStorage.getItem('milkTeaPlayerSession')
+let initialPlayerSession = null
+try { initialPlayerSession = storedPlayerSession ? JSON.parse(storedPlayerSession) : null } catch { localStorage.removeItem('milkTeaPlayerSession') }
+const playerSession = ref(initialPlayerSession)
+const loginForm = ref({ name: '', pin: '', new_player: false })
+const adminKey = ref(localStorage.getItem('milkTeaAdminKey') || '')
+const adminMessage = ref('')
+const adminLoading = ref(false)
+const adminMatchId = ref('')
+const adminMatchJson = ref('')
+const eventForm = ref({ event_date: '', title: '奶茶杯日常赛', capacity: 10, waitlist_capacity: 5, status: 'open' })
 
 const stats = computed(() => calculateStats(tournament.value))
 const warnings = computed(() => [
@@ -45,7 +60,118 @@ const views = [
   { id: 'matches', label: '对战记录', short: '对战' },
   { id: 'honors', label: '荣誉榜单', short: '榜单' },
   { id: 'players', label: '选手评分', short: '选手' },
+  { id: 'signup', label: '比赛报名', short: '报名' },
+  { id: 'admin', label: '赛事管理', short: '管理' },
 ]
+
+async function api(path, options = {}) {
+  if (!apiBase) throw new Error('报名后端尚未配置')
+  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) }
+  if (playerSession.value?.token) headers.Authorization = `Bearer ${playerSession.value.token}`
+  const response = await fetch(`${apiBase}${path}`, { ...options, headers })
+  const body = await response.json().catch(() => ({}))
+  if (!response.ok) throw new Error(body.message || '请求失败')
+  return body
+}
+
+async function loadBackend() {
+  if (!apiBase) return
+  try {
+    const [data, events] = await Promise.all([api('/api/tournament'), api('/api/events')])
+    tournament.value = data
+    signupEvents.value = events.events || []
+    if (signupMessage.value.startsWith('后端连接失败')) signupMessage.value = ''
+  } catch (error) {
+    signupMessage.value = `后端连接失败，当前继续显示静态数据：${error.message}`
+  }
+}
+
+async function loginPlayer() {
+  signupLoading.value = true
+  signupMessage.value = ''
+  try {
+    const session = await api('/api/auth/player', { method: 'POST', body: JSON.stringify(loginForm.value) })
+    playerSession.value = session
+    localStorage.setItem('milkTeaPlayerSession', JSON.stringify(session))
+    signupMessage.value = `欢迎，${session.player.name}`
+  } catch (error) { signupMessage.value = error.message } finally { signupLoading.value = false }
+}
+
+async function registerEvent(event) {
+  signupLoading.value = true
+  try {
+    const result = await api(`/api/events/${event.id}/register`, { method: 'POST', body: '{}' })
+    signupMessage.value = result.registration.status === 'registered' ? '报名成功' : '正赛已满，已进入候补'
+    await loadBackend()
+  } catch (error) { signupMessage.value = error.message } finally { signupLoading.value = false }
+}
+
+async function cancelRegistration(event) {
+  signupLoading.value = true
+  try {
+    await api(`/api/events/${event.id}/register`, { method: 'DELETE' })
+    signupMessage.value = '已取消报名'
+    await loadBackend()
+  } catch (error) { signupMessage.value = error.message } finally { signupLoading.value = false }
+}
+
+async function logoutPlayer() {
+  try { await api('/api/auth/logout', { method: 'POST' }) } catch { /* 本地仍然退出 */ }
+  playerSession.value = null
+  localStorage.removeItem('milkTeaPlayerSession')
+}
+
+function saveAdminKey() {
+  localStorage.setItem('milkTeaAdminKey', adminKey.value)
+  adminMessage.value = '管理员密钥已保存在当前浏览器'
+}
+
+async function adminApi(path, options = {}) {
+  return api(path, { ...options, headers: { 'X-Admin-Key': adminKey.value, ...(options.headers || {}) } })
+}
+
+function selectAdminMatch() {
+  const match = tournament.value.matches.find((item) => item.id === adminMatchId.value)
+  adminMatchJson.value = match ? JSON.stringify(match, null, 2) : ''
+}
+
+async function saveAdminMatch() {
+  adminLoading.value = true
+  try {
+    const match = JSON.parse(adminMatchJson.value)
+    const id = match.id || adminMatchId.value
+    if (!id) throw new Error('请选择比赛或填写比赛 id')
+    await adminApi(`/api/admin/matches/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(match) })
+    adminMessage.value = `比赛 ${id} 已保存`
+    await loadBackend()
+  } catch (error) { adminMessage.value = error.message } finally { adminLoading.value = false }
+}
+
+async function importTournament(event) {
+  const [file] = event.target.files
+  if (!file) return
+  adminLoading.value = true
+  try {
+    const payload = JSON.parse(await file.text())
+    const result = await adminApi('/api/admin/tournament/import?replace_all=1', { method: 'POST', body: JSON.stringify(payload) })
+    adminMessage.value = `导入成功：${result.summary.matches} 场，${result.summary.records} 条记录`
+    await loadBackend()
+  } catch (error) { adminMessage.value = error.message } finally {
+    adminLoading.value = false
+    event.target.value = ''
+  }
+}
+
+async function createEvent() {
+  adminLoading.value = true
+  try {
+    await adminApi('/api/admin/events', { method: 'POST', body: JSON.stringify(eventForm.value) })
+    adminMessage.value = `${eventForm.value.event_date} 的报名场次已创建`
+    await loadBackend()
+  } catch (error) { adminMessage.value = error.message } finally { adminLoading.value = false }
+}
+
+onMounted(loadBackend)
 
 function teamKills(team) {
   return team.reduce((sum, player) => sum + Number(player.kills || 0), 0)
@@ -305,7 +431,7 @@ async function loadJson(event) {
         </div>
       </section>
 
-      <section v-else class="view">
+      <section v-else-if="activeView === 'players'" class="view">
         <div class="page-title player-title">
           <div><p class="eyebrow">PLAYER POWER RANKING</p><h1>选手实力评分</h1></div>
           <p>100 分制：局内均分 55% + 胜率 20% + MVP 率 15% + FMVP 率 10%。</p>
@@ -333,12 +459,89 @@ async function loadJson(event) {
           </aside>
         </div>
       </section>
+
+      <section v-else-if="activeView === 'signup'" class="view signup-view">
+        <div class="page-title">
+          <div><p class="eyebrow">DAILY MATCH REGISTRATION</p><h1>每日比赛报名</h1></div>
+          <p>已有选手直接使用昵称和 PIN 登录；第一次参加可以创建玩家档案并立即报名。</p>
+        </div>
+
+        <div v-if="signupMessage" class="notice">{{ signupMessage }}</div>
+        <div v-if="!apiBase" class="signup-empty">
+          <b>报名服务尚未部署</b><p>当前统计看板仍可正常使用。部署 Laravel 后端并配置 VITE_API_BASE_URL 后，这里会自动启用。</p>
+        </div>
+        <template v-else>
+          <article v-if="!playerSession" class="signup-login">
+            <header><small>PLAYER ACCESS</small><h2>{{ loginForm.new_player ? '创建新玩家' : '玩家登录' }}</h2></header>
+            <label>玩家昵称<input v-model.trim="loginForm.name" maxlength="50" placeholder="例如：Jack" /></label>
+            <label>报名 PIN<input v-model="loginForm.pin" inputmode="numeric" maxlength="12" type="password" placeholder="4—12 位数字" /></label>
+            <label class="signup-check"><input v-model="loginForm.new_player" type="checkbox" /> 我是第一次参加，创建新玩家档案</label>
+            <button type="button" :disabled="signupLoading" @click="loginPlayer">{{ signupLoading ? '处理中…' : loginForm.new_player ? '创建并登录' : '登录' }}</button>
+          </article>
+          <div v-else class="signup-session"><span>当前玩家：<b>{{ playerSession.player.name }}</b></span><button type="button" @click="logoutPlayer">退出</button></div>
+
+          <div class="event-grid">
+            <article v-for="event in signupEvents" :key="event.id" class="event-card">
+              <header><small>{{ event.status === 'open' ? '报名中' : '报名已关闭' }}</small><h2>{{ event.title }}</h2><time>{{ event.event_date }}</time></header>
+              <div class="event-capacity"><span><b>{{ event.registrations.filter(item => item.status === 'registered').length }}</b> / {{ event.capacity }} 人</span><small>候补 {{ event.registrations.filter(item => item.status === 'waitlist').length }} 人</small></div>
+              <div class="event-roster"><span v-for="item in event.registrations" :key="item.id" :class="item.status">{{ item.player.name }}</span></div>
+              <div v-if="playerSession" class="event-actions">
+                <button v-if="!event.registrations.some(item => item.player_id === playerSession.player.id)" type="button" :disabled="signupLoading || event.status !== 'open'" @click="registerEvent(event)">立即报名</button>
+                <button v-else class="cancel" type="button" :disabled="signupLoading" @click="cancelRegistration(event)">取消报名</button>
+              </div>
+            </article>
+            <div v-if="!signupEvents.length" class="signup-empty"><b>暂无开放场次</b><p>管理员创建新的比赛日后会显示在这里。</p></div>
+          </div>
+        </template>
+      </section>
+
+      <section v-else class="view admin-view">
+        <div class="page-title">
+          <div><p class="eyebrow">TOURNAMENT CONTROL CENTER</p><h1>赛事管理</h1></div>
+          <p>创建报名日、导入完整比赛 JSON，或选中单场比赛直接修改。所有排行榜会随数据库自动重算。</p>
+        </div>
+
+        <div v-if="adminMessage" class="notice">{{ adminMessage }}</div>
+        <div v-if="!apiBase" class="signup-empty"><b>管理服务尚未部署</b><p>配置 VITE_API_BASE_URL 后即可使用。</p></div>
+        <template v-else>
+          <article class="admin-key-card">
+            <label>管理员密钥<input v-model="adminKey" type="password" autocomplete="current-password" placeholder="后端 TOURNAMENT_ADMIN_KEY" /></label>
+            <button type="button" @click="saveAdminKey">保存到本机</button>
+          </article>
+
+          <div class="admin-grid">
+            <article class="admin-panel">
+              <header><small>REGISTRATION EVENT</small><h2>创建比赛报名</h2></header>
+              <label>比赛日期<input v-model="eventForm.event_date" type="date" /></label>
+              <label>场次名称<input v-model.trim="eventForm.title" maxlength="100" /></label>
+              <div class="admin-fields">
+                <label>正赛人数<input v-model.number="eventForm.capacity" type="number" min="2" max="100" /></label>
+                <label>候补人数<input v-model.number="eventForm.waitlist_capacity" type="number" min="0" max="100" /></label>
+              </div>
+              <button type="button" :disabled="adminLoading || !adminKey || !eventForm.event_date" @click="createEvent">创建报名场次</button>
+            </article>
+
+            <article class="admin-panel">
+              <header><small>FULL DATA IMPORT</small><h2>导入比赛 JSON</h2></header>
+              <p>会用上传文件替换数据库内的全部比赛记录。玩家报名账号与报名记录不会被删除。</p>
+              <label class="admin-upload"><input type="file" accept="application/json,.json" :disabled="adminLoading || !adminKey" @change="importTournament" /><span>选择 tournament.json 并导入</span></label>
+            </article>
+          </div>
+
+          <article class="admin-panel match-editor">
+            <header><small>SINGLE MATCH EDITOR</small><h2>修改单场比赛</h2></header>
+            <label>选择比赛<select v-model="adminMatchId" @change="selectAdminMatch"><option value="">请选择</option><option v-for="match in stats.matches" :key="match.id" :value="match.id">{{ match.date }} · {{ match.round }} · {{ match.id }}</option></select></label>
+            <textarea v-model="adminMatchJson" spellcheck="false" placeholder="选择比赛后，这里会显示该场 JSON"></textarea>
+            <button type="button" :disabled="adminLoading || !adminKey || !adminMatchJson" @click="saveAdminMatch">校验并保存本场数据</button>
+          </article>
+        </template>
+      </section>
     </main>
 
-    <footer><span>奶茶杯赛事数据台</span><p>替换 <code>src/data/tournament.json</code> 后，全部榜单会在构建时自动更新。</p></footer>
+    <footer><span>奶茶杯赛事数据台</span><p>比赛数据由 Laravel API 自动同步；未配置后端时使用内置 JSON。</p></footer>
 
     <nav class="mobile-nav" aria-label="移动端主导航">
-      <button v-for="view in views" :key="view.id" :class="{ active: activeView === view.id }" type="button" @click="activeView = view.id"><span>{{ { overview: '⌂', matches: '▤', honors: '✦', players: '♙' }[view.id] }}</span>{{ view.short }}</button>
+      <button v-for="view in views" :key="view.id" :class="{ active: activeView === view.id }" type="button" @click="activeView = view.id"><span>{{ { overview: '⌂', matches: '▤', honors: '✦', players: '♙', signup: '✓', admin: '⚙' }[view.id] }}</span>{{ view.short }}</button>
     </nav>
   </div>
 </template>

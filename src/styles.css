@@ -253,7 +253,7 @@ footer code { color: var(--tea-dark); }
   .profile-top { min-height: 250px; }
   footer { display: block; padding-bottom: 28px; }
   footer p { margin-top: 8px; line-height: 1.7; }
-  .mobile-nav { position: fixed; z-index: 30; left: 10px; right: 10px; bottom: 10px; height: 58px; display: grid; grid-template-columns: repeat(4, 1fr); padding: 5px; background: rgba(32,23,16,.94); backdrop-filter: blur(16px); box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+  .mobile-nav { position: fixed; z-index: 30; left: 10px; right: 10px; bottom: 10px; height: 58px; display: grid; grid-template-columns: repeat(6, 1fr); padding: 5px; background: rgba(32,23,16,.94); backdrop-filter: blur(16px); box-shadow: 0 10px 30px rgba(0,0,0,.25); }
   .mobile-nav button { display: grid; place-items: center; gap: 1px; border: 0; background: transparent; color: #ab9b8e; font-size: 9px; cursor: pointer; }
   .mobile-nav button span { font-size: 16px; }
   .mobile-nav button.active { background: #f0b66c; color: var(--ink); }
@@ -387,6 +387,53 @@ body { background: var(--paper); }
 .mobile-nav button.active { color: #09111d; background: linear-gradient(135deg,#f0ce82,#b57d2d); }
 footer { border-color: var(--line); }
 
+.signup-view { max-width: 1080px; }
+.signup-login, .event-card, .signup-session, .signup-empty { border: 1px solid var(--line); background: rgba(10,22,38,.9); box-shadow: var(--shadow); }
+.signup-login { width: min(520px,100%); margin: 34px auto; padding: 30px; }
+.signup-login header small, .event-card header small { color: #d9b96f; font-size: 10px; font-weight: 800; letter-spacing: .14em; }
+.signup-login h2, .event-card h2 { margin: 7px 0 22px; font-family: STZhongsong,SimSun,serif; font-size: 30px; }
+.signup-login label { display: grid; gap: 8px; margin-top: 16px; color: var(--muted); font-size: 12px; }
+.signup-login input:not([type="checkbox"]) { width: 100%; box-sizing: border-box; padding: 13px 14px; color: var(--ink); background: #07111e; border: 1px solid var(--line); outline: none; }
+.signup-login input:focus { border-color: #d9b35f; }
+.signup-check { display: flex !important; grid-template-columns: auto 1fr; align-items: center; }
+.signup-login > button, .event-actions button { width: 100%; margin-top: 22px; padding: 13px; border: 1px solid #c79a48; color: #09111d; background: linear-gradient(135deg,#f0ce82,#b57d2d); font-weight: 800; cursor: pointer; }
+.signup-login button:disabled, .event-actions button:disabled { opacity: .45; cursor: not-allowed; }
+.signup-session { display: flex; justify-content: space-between; align-items: center; margin: 28px 0; padding: 17px 20px; }
+.signup-session button { border: 0; background: transparent; color: #e9c979; cursor: pointer; }
+.event-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }
+.event-card { padding: 25px; }
+.event-card header { position: relative; }
+.event-card header time { position: absolute; right: 0; top: 0; color: var(--muted); }
+.event-capacity { display: flex; justify-content: space-between; align-items: end; padding: 16px 0; border-block: 1px solid var(--line); }
+.event-capacity b { color: #f0ce7f; font: 32px/1 Impact,sans-serif; }
+.event-capacity small { color: var(--muted); }
+.event-roster { display: flex; flex-wrap: wrap; gap: 8px; min-height: 44px; padding-top: 17px; }
+.event-roster span { padding: 6px 9px; border: 1px solid rgba(217,173,86,.28); color: var(--ink); font-size: 11px; }
+.event-roster span.waitlist { color: var(--muted); border-style: dashed; }
+.event-actions .cancel { color: #f0b8b8; border-color: #7d3439; background: #30171d; }
+.signup-empty { grid-column: 1/-1; padding: 42px; text-align: center; color: var(--muted); }
+.signup-empty b { color: var(--ink); font-size: 20px; }
+
+.admin-view { max-width: 1180px; }
+.admin-key-card, .admin-panel { border: 1px solid var(--line); background: rgba(10,22,38,.9); box-shadow: var(--shadow); }
+.admin-key-card { display: flex; align-items: end; gap: 14px; margin: 28px 0 20px; padding: 20px; }
+.admin-key-card label { flex: 1; }
+.admin-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }
+.admin-panel { padding: 25px; }
+.admin-panel header small { color: #d9b96f; font-size: 10px; font-weight: 800; letter-spacing: .14em; }
+.admin-panel h2 { margin: 7px 0 20px; font-family: STZhongsong,SimSun,serif; font-size: 28px; }
+.admin-panel p { color: var(--muted); line-height: 1.7; }
+.admin-panel label, .admin-key-card label { display: grid; gap: 7px; margin-top: 14px; color: var(--muted); font-size: 11px; }
+.admin-panel input, .admin-panel select, .admin-key-card input, .match-editor textarea { width: 100%; box-sizing: border-box; padding: 12px; color: var(--ink); background: #07111e; border: 1px solid var(--line); outline: none; }
+.admin-panel input:focus, .admin-panel select:focus, .admin-key-card input:focus, .match-editor textarea:focus { border-color: #d9b35f; }
+.admin-panel > button, .admin-key-card > button, .admin-upload span { display: inline-block; margin-top: 20px; padding: 12px 17px; border: 1px solid #c79a48; color: #09111d; background: linear-gradient(135deg,#f0ce82,#b57d2d); font-weight: 800; cursor: pointer; }
+.admin-panel button:disabled { opacity: .45; cursor: not-allowed; }
+.admin-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.admin-upload input { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); }
+.admin-upload span { text-align: center; }
+.match-editor { margin-top: 20px; }
+.match-editor textarea { min-height: 420px; margin-top: 16px; resize: vertical; font: 12px/1.65 Consolas,monospace; }
+
 @media (max-width: 800px) {
   .hero { gap: 65px; }
   .hero::before { width: 300px; height: 300px; right: -170px; }
@@ -402,4 +449,10 @@ footer { border-color: var(--line); }
   .captain-card[data-side="red"] { border-right: 0; border-left: 4px solid var(--red); box-shadow: inset 24px 0 55px rgba(238,90,98,.07); }
   .captain-copy h3 { font-size: 42px; }
   .captain-rules { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .event-grid { grid-template-columns: 1fr; }
+  .signup-login { padding: 22px; }
+  .admin-grid { grid-template-columns: 1fr; }
+  .admin-key-card { align-items: stretch; flex-direction: column; }
+  .admin-fields { grid-template-columns: 1fr; }
+  .match-editor textarea { min-height: 330px; }
 }

@@ -3,3 +3,8 @@ dist/
 .playwright-cli/
 output/
 *.log
+backend/vendor/
+backend/node_modules/
+backend/.env
+backend/database/*.sqlite
+!backend/database/.gitignore
