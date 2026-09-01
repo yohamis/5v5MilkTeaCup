@@ -6,11 +6,50 @@ use App\Models\MatchEvent;
 use App\Services\TournamentDataService;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class TournamentApiTest extends TestCase
 {
     use LazilyRefreshDatabase;
+
+    public function test_visiting_events_automatically_opens_today_registration_once(): void
+    {
+        Carbon::setTestNow('2026-09-01 08:30:00');
+
+        $this->getJson('/api/events')
+            ->assertOk()
+            ->assertJsonCount(1, 'events')
+            ->assertJsonPath('events.0.event_date', '2026-09-01')
+            ->assertJsonPath('events.0.title', '奶茶杯日常赛')
+            ->assertJsonPath('events.0.status', 'open');
+
+        $this->getJson('/api/events')->assertOk()->assertJsonCount(1, 'events');
+
+        $this->assertDatabaseCount('match_events', 1);
+        $this->assertDatabaseHas('match_events', [
+            'event_date' => '2026-09-01',
+            'capacity' => 10,
+            'waitlist_capacity' => 5,
+        ]);
+    }
+
+    public function test_new_player_can_register_for_automatically_created_today_event(): void
+    {
+        Carbon::setTestNow('2026-09-01 09:00:00');
+        $eventId = $this->getJson('/api/events')->assertOk()->json('events.0.id');
+        $login = $this->postJson('/api/auth/player', ['name' => '今日新玩家', 'pin' => '123456', 'new_player' => true])
+            ->assertOk()->json();
+
+        $this->withToken($login['token'])->postJson("/api/events/{$eventId}/register")
+            ->assertCreated()
+            ->assertJsonPath('registration.status', 'registered');
+
+        $this->assertDatabaseHas('registrations', [
+            'match_event_id' => $eventId,
+            'status' => 'registered',
+        ]);
+    }
 
     public function test_existing_json_imports_and_exports_without_losing_records(): void
     {

@@ -29,14 +29,16 @@ php artisan serve
 
 玩家通过“昵称 + 4—12 位数字 PIN”登录。历史玩家首次登录会设置自己的 PIN；新玩家勾选“第一次参加”即可创建档案并报名。
 
-网页的“赛事管理”页面可以保存管理员密钥、创建报名场次、上传完整 JSON，以及选择单场比赛编辑并保存。密钥仅保存在当前浏览器，后端仍会用 `.env` 中的 `TOURNAMENT_ADMIN_KEY` 校验每次管理请求。
+报名页每天按 `APP_TIMEZONE`（默认 `Asia/Shanghai`）自动开放当天场次。只要有人打开报名页，就会创建当天唯一场次，不需要管理员预先创建，也不依赖服务器定时任务。
+
+网页的“赛事管理”页面可以保存管理员密钥、补建特殊日期报名场次、上传完整 JSON，以及选择单场比赛编辑并保存。密钥仅保存在当前浏览器，后端仍会用 `.env` 中的 `TOURNAMENT_ADMIN_KEY` 校验每次管理请求。
 
 对应管理员接口：
 
 - `POST /api/admin/tournament/import`：导入完整 JSON
 - `PUT /api/admin/matches/{比赛ID}`：修改单场比赛
 - `DELETE /api/admin/matches/{比赛ID}`：删除比赛
-- `POST /api/admin/events`：创建每日报名场次
+- `POST /api/admin/events`：补建或创建特殊日期报名场次
 - `PATCH /api/admin/events/{id}`：修改报名场次
 - `PATCH /api/admin/players/{id}`：修改玩家
 

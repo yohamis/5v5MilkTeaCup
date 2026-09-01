@@ -463,7 +463,7 @@ async function loadJson(event) {
       <section v-else-if="activeView === 'signup'" class="view signup-view">
         <div class="page-title">
           <div><p class="eyebrow">DAILY MATCH REGISTRATION</p><h1>每日比赛报名</h1></div>
-          <p>已有选手直接使用昵称和 PIN 登录；第一次参加可以创建玩家档案并立即报名。</p>
+          <p>每天自动开放当天场次；已有选手直接登录，新玩家创建档案后即可报名，无需等待管理员建场。</p>
         </div>
 
         <div v-if="signupMessage" class="notice">{{ signupMessage }}</div>
@@ -490,7 +490,7 @@ async function loadJson(event) {
                 <button v-else class="cancel" type="button" :disabled="signupLoading" @click="cancelRegistration(event)">取消报名</button>
               </div>
             </article>
-            <div v-if="!signupEvents.length" class="signup-empty"><b>暂无开放场次</b><p>管理员创建新的比赛日后会显示在这里。</p></div>
+            <div v-if="!signupEvents.length" class="signup-empty"><b>今日场次正在准备</b><p>请稍后刷新报名页面。</p></div>
           </div>
         </template>
       </section>
@@ -498,7 +498,7 @@ async function loadJson(event) {
       <section v-else class="view admin-view">
         <div class="page-title">
           <div><p class="eyebrow">TOURNAMENT CONTROL CENTER</p><h1>赛事管理</h1></div>
-          <p>创建报名日、导入完整比赛 JSON，或选中单场比赛直接修改。所有排行榜会随数据库自动重算。</p>
+          <p>日常报名会每天自动创建；这里可以补建特殊日期场次、导入完整比赛 JSON，或修改单场比赛。</p>
         </div>
 
         <div v-if="adminMessage" class="notice">{{ adminMessage }}</div>
@@ -511,7 +511,7 @@ async function loadJson(event) {
 
           <div class="admin-grid">
             <article class="admin-panel">
-              <header><small>REGISTRATION EVENT</small><h2>创建比赛报名</h2></header>
+              <header><small>REGISTRATION EVENT</small><h2>补建特殊日期报名</h2></header>
               <label>比赛日期<input v-model="eventForm.event_date" type="date" /></label>
               <label>场次名称<input v-model.trim="eventForm.title" maxlength="100" /></label>
               <div class="admin-fields">

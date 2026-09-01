@@ -5,14 +5,17 @@ namespace App\Http\Controllers;
 use App\Http\Requests\RegisterEventRequest;
 use App\Models\MatchEvent;
 use App\Models\Registration;
+use App\Services\DailyMatchEventService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class RegistrationController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(DailyMatchEventService $dailyMatchEventService): JsonResponse
     {
+        $dailyMatchEventService->ensureToday();
+
         $events = MatchEvent::with(['registrations' => fn ($q) => $q->whereIn('status', ['registered', 'waitlist'])->with('player:id,name')])
             ->where('event_date', '>=', today()->toDateString())->orderBy('event_date')->get();
 
