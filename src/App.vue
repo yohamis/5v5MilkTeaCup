@@ -54,6 +54,15 @@ const honorBoard = computed(() => {
 const teaBoard = computed(() =>
   teaBoardType.value === 'tea' ? stats.value.teaLeaders : stats.value.treatLeaders,
 )
+const primarySignupEvent = computed(() => signupEvents.value[0] || null)
+
+function eventRegistrations(event, status) {
+  return event.registrations.filter((item) => item.status === status)
+}
+
+function isCurrentPlayer(item) {
+  return item.player_id === playerSession.value?.player.id
+}
 
 const views = [
   { id: 'overview', label: '赛场总览', short: '总览' },
@@ -461,9 +470,23 @@ async function loadJson(event) {
       </section>
 
       <section v-else-if="activeView === 'signup'" class="view signup-view">
-        <div class="page-title">
-          <div><p class="eyebrow">DAILY MATCH REGISTRATION</p><h1>每日比赛报名</h1></div>
-          <p>每天自动开放当天场次；已有选手直接登录，新玩家创建档案后即可报名，无需等待管理员建场。</p>
+        <div class="signup-command-hero">
+          <div class="signup-command-copy">
+            <div class="signup-live"><i></i><span>DAILY ASSEMBLY · 每日自动开放</span></div>
+            <p class="eyebrow">MILK TEA CUP · 5V5</p>
+            <h1>今日，<em>集结王者</em></h1>
+            <p>无需等待开房通知。确认选手身份，占领今日席位；满 10 人即可组织奶茶杯对局。</p>
+            <div class="signup-hero-meta">
+              <span><small>今日场次</small><b>{{ primarySignupEvent ? '已开放' : '准备中' }}</b></span>
+              <span><small>集结人数</small><b>{{ primarySignupEvent ? eventRegistrations(primarySignupEvent, 'registered').length : 0 }} / {{ primarySignupEvent?.capacity || 10 }}</b></span>
+              <span><small>候补队列</small><b>{{ primarySignupEvent ? eventRegistrations(primarySignupEvent, 'waitlist').length : 0 }} 人</b></span>
+            </div>
+          </div>
+          <div class="signup-war-order" aria-hidden="true">
+            <div class="war-order-ring"><span>5<small>V</small>5</span><b>集结令</b></div>
+            <i class="war-order-wing left"></i><i class="war-order-wing right"></i>
+            <p>荣耀峡谷 · 奶茶杯</p>
+          </div>
         </div>
 
         <div v-if="signupMessage" class="notice">{{ signupMessage }}</div>
@@ -471,26 +494,73 @@ async function loadJson(event) {
           <b>报名服务尚未部署</b><p>当前统计看板仍可正常使用。部署 Laravel 后端并配置 VITE_API_BASE_URL 后，这里会自动启用。</p>
         </div>
         <template v-else>
-          <article v-if="!playerSession" class="signup-login">
-            <header><small>PLAYER ACCESS</small><h2>{{ loginForm.new_player ? '创建新玩家' : '玩家登录' }}</h2></header>
-            <label>玩家昵称<input v-model.trim="loginForm.name" maxlength="50" placeholder="例如：Jack" /></label>
-            <label>报名 PIN<input v-model="loginForm.pin" inputmode="numeric" maxlength="12" type="password" placeholder="4—12 位数字" /></label>
-            <label class="signup-check"><input v-model="loginForm.new_player" type="checkbox" /> 我是第一次参加，创建新玩家档案</label>
-            <button type="button" :disabled="signupLoading" @click="loginPlayer">{{ signupLoading ? '处理中…' : loginForm.new_player ? '创建并登录' : '登录' }}</button>
-          </article>
-          <div v-else class="signup-session"><span>当前玩家：<b>{{ playerSession.player.name }}</b></span><button type="button" @click="logoutPlayer">退出</button></div>
+          <section v-if="!playerSession" class="signup-access">
+            <div class="signup-access-brief">
+              <small>STEP 01 · 身份确认</small>
+              <h2>先亮出你的<br />选手名牌</h2>
+              <p>老选手使用昵称和 PIN 登录；首次参赛勾选“新玩家”，系统会同时建立选手档案。</p>
+              <div><span>01</span> 登录选手身份</div>
+              <div><span>02</span> 选择今日席位</div>
+              <div><span>03</span> 等待十人集结</div>
+            </div>
+            <form class="signup-login" @submit.prevent="loginPlayer">
+              <header><small>PLAYER ACCESS</small><h2>{{ loginForm.new_player ? '创建新玩家' : '选手登录' }}</h2><p>{{ loginForm.new_player ? '第一次参赛？现在建立你的选手档案。' : '欢迎归队，登录后即可占领今日席位。' }}</p></header>
+              <label>玩家昵称<input v-model.trim="loginForm.name" maxlength="50" placeholder="输入比赛常用昵称" /></label>
+              <label>报名 PIN<input v-model="loginForm.pin" inputmode="numeric" maxlength="12" type="password" placeholder="4—12 位数字" /></label>
+              <label class="signup-check"><input v-model="loginForm.new_player" type="checkbox" /><span><b>我是第一次参加</b><small>创建新玩家档案并继续报名</small></span></label>
+              <button type="submit" :disabled="signupLoading"><span>{{ signupLoading ? '身份确认中…' : loginForm.new_player ? '创建档案并进入' : '确认身份，进入战场' }}</span><i>→</i></button>
+            </form>
+          </section>
+          <div v-else class="signup-session">
+            <div class="session-avatar">{{ playerSession.player.name.slice(0, 1) }}</div>
+            <span><small>当前选手 · ONLINE</small><b>{{ playerSession.player.name }}</b></span>
+            <em>身份已确认，可以报名</em>
+            <button type="button" @click="logoutPlayer">退出登录</button>
+          </div>
 
           <div class="event-grid">
-            <article v-for="event in signupEvents" :key="event.id" class="event-card">
-              <header><small>{{ event.status === 'open' ? '报名中' : '报名已关闭' }}</small><h2>{{ event.title }}</h2><time>{{ event.event_date }}</time></header>
-              <div class="event-capacity"><span><b>{{ event.registrations.filter(item => item.status === 'registered').length }}</b> / {{ event.capacity }} 人</span><small>候补 {{ event.registrations.filter(item => item.status === 'waitlist').length }} 人</small></div>
-              <div class="event-roster"><span v-for="item in event.registrations" :key="item.id" :class="item.status">{{ item.player.name }}</span></div>
-              <div v-if="playerSession" class="event-actions">
-                <button v-if="!event.registrations.some(item => item.player_id === playerSession.player.id)" type="button" :disabled="signupLoading || event.status !== 'open'" @click="registerEvent(event)">立即报名</button>
-                <button v-else class="cancel" type="button" :disabled="signupLoading" @click="cancelRegistration(event)">取消报名</button>
+            <article v-for="event in signupEvents" :key="event.id" class="event-card" :class="{ full: eventRegistrations(event, 'registered').length >= event.capacity }">
+              <header class="event-command-header">
+                <div><span class="event-state"><i></i>{{ event.status === 'open' ? '报名开放中' : '报名已关闭' }}</span><small>DAILY MATCH ORDER</small><h2>{{ event.title }}</h2></div>
+                <time><small>MATCH DAY</small><b>{{ event.event_date.slice(5).replace('-', ' / ') }}</b><span>{{ event.event_date.slice(0, 4) }}</span></time>
+              </header>
+
+              <div class="event-readiness">
+                <div class="readiness-copy"><span>战队集结进度</span><b>{{ eventRegistrations(event, 'registered').length }}<small> / {{ event.capacity }} 人</small></b></div>
+                <div class="readiness-track" role="progressbar" :aria-valuenow="eventRegistrations(event, 'registered').length" aria-valuemin="0" :aria-valuemax="event.capacity">
+                  <i v-for="slot in event.capacity" :key="slot" :class="{ filled: slot <= eventRegistrations(event, 'registered').length }"></i>
+                </div>
+                <p>{{ eventRegistrations(event, 'registered').length >= event.capacity ? '正式席位已满，新报名将进入候补队列。' : `还差 ${event.capacity - eventRegistrations(event, 'registered').length} 人即可满员开战。` }}</p>
+              </div>
+
+              <div class="event-roster-board">
+                <div class="roster-heading"><span><i>✦</i> 正式席位</span><small>{{ eventRegistrations(event, 'registered').length }} / {{ event.capacity }}</small></div>
+                <div class="roster-grid">
+                  <div v-for="(item, index) in eventRegistrations(event, 'registered')" :key="item.id" class="roster-slot occupied" :class="{ mine: isCurrentPlayer(item) }">
+                    <span>{{ item.player.name.slice(0, 1) }}</span><b>{{ item.player.name }}</b><small>#{{ String(index + 1).padStart(2, '0') }}</small>
+                  </div>
+                  <div v-for="slot in Math.max(0, event.capacity - eventRegistrations(event, 'registered').length)" :key="`empty-${slot}`" class="roster-slot empty">
+                    <span>+</span><b>等待选手</b><small>OPEN</small>
+                  </div>
+                </div>
+
+                <div class="waitlist-row">
+                  <div class="roster-heading"><span><i>◇</i> 候补队列</span><small>{{ eventRegistrations(event, 'waitlist').length }} / {{ event.waitlist_capacity }}</small></div>
+                  <div class="waitlist-players">
+                    <span v-for="item in eventRegistrations(event, 'waitlist')" :key="item.id" :class="{ mine: isCurrentPlayer(item) }">{{ item.player.name }}</span>
+                    <em v-if="!eventRegistrations(event, 'waitlist').length">当前无人候补</em>
+                  </div>
+                </div>
+              </div>
+
+              <div class="event-actions">
+                <div><small>{{ playerSession ? 'YOUR STATUS' : 'PLAYER ACCESS REQUIRED' }}</small><b v-if="playerSession">{{ event.registrations.some(item => isCurrentPlayer(item)) ? '你已在今日名单中' : '今日尚未报名' }}</b><b v-else>登录后即可占领席位</b></div>
+                <button v-if="playerSession && !event.registrations.some(item => isCurrentPlayer(item))" type="button" :disabled="signupLoading || event.status !== 'open'" @click="registerEvent(event)"><span>{{ eventRegistrations(event, 'registered').length >= event.capacity ? '加入候补队列' : '立即报名，占领席位' }}</span><i>→</i></button>
+                <button v-else-if="playerSession" class="cancel" type="button" :disabled="signupLoading" @click="cancelRegistration(event)">取消今日报名</button>
+                <span v-else class="login-hint">请先完成上方身份确认</span>
               </div>
             </article>
-            <div v-if="!signupEvents.length" class="signup-empty"><b>今日场次正在准备</b><p>请稍后刷新报名页面。</p></div>
+            <div v-if="!signupEvents.length" class="signup-empty"><span>◇</span><b>今日战场正在开启</b><p>场次准备完成后会在这里显示，请稍后刷新页面。</p></div>
           </div>
         </template>
       </section>
