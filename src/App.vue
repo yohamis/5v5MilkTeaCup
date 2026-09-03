@@ -291,7 +291,7 @@ async function loadJson(event) {
             <article class="captain-card winner-captain" data-side="blue">
               <div class="captain-crown">♛</div>
               <div class="captain-copy">
-                <small>胜方队长 · 当日荣誉次数优先</small>
+                <small>胜方队长 · 当日品茶选手</small>
                 <h3>{{ stats.captainSelection.winnerCaptain.name }}</h3>
                 <p>当日 MVP+FMVP {{ stats.captainSelection.winnerCaptain.mvp + stats.captainSelection.winnerCaptain.fmvp }} 次，MVP {{ stats.captainSelection.winnerCaptain.mvp }} 次</p>
               </div>
@@ -308,7 +308,7 @@ async function loadJson(event) {
             <article class="captain-card loser-captain" data-side="red">
               <div class="captain-crown">♜</div>
               <div class="captain-copy">
-                <small>败方队长 · 当日荣誉次数优先</small>
+                <small>败方队长 · 当日请客选手</small>
                 <h3>{{ stats.captainSelection.loserCaptain.name }}</h3>
                 <p>当日 MVP+FMVP {{ stats.captainSelection.loserCaptain.mvp + stats.captainSelection.loserCaptain.fmvp }} 次，MVP {{ stats.captainSelection.loserCaptain.mvp }} 次</p>
               </div>
@@ -322,8 +322,8 @@ async function loadJson(event) {
           </div>
 
           <div class="captain-rules">
-            <span><b>胜方规则</b> 当日 MVP+FMVP 次数 → MVP 次数 → 当日平均评分</span>
-            <span><b>败方规则</b> 同一排序规则，且必须来自最近一局的另一支队伍</span>
+            <span><b>胜方规则</b> 最后比赛日品茶选手 → MVP+FMVP 次数 → MVP 次数 → 当日平均评分</span>
+            <span><b>败方规则</b> 最后比赛日请客选手 → MVP+FMVP 次数 → MVP 次数 → 当日平均评分</span>
           </div>
         </section>
 

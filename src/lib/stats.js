@@ -147,38 +147,32 @@ export function calculateStats(data) {
     }
     const datePlayers = [...datePlayerMap.values()].map(finalize)
 
-    // 队长统一规则：当日 MVP+FMVP 总次数、MVP 次数、当日平均评分。
-    const winnerCandidates = [...datePlayers].sort(
-      (a, b) =>
-        b.mvp + b.fmvp - (a.mvp + a.fmvp) || b.mvp - a.mvp || b.avgRating - a.avgRating,
-    )
-    // 两位队长必须来自最近一局的不同队伍；红蓝方互换时仍按该局实际阵容判断。
+    // 最后比赛日中，品茶选手属于胜方候选，请客选手属于败方候选。
+    const captainRanking = (a, b) =>
+      b.mvp + b.fmvp - (a.mvp + a.fmvp) || b.mvp - a.mvp || b.avgRating - a.avgRating
+    const winnerCandidates = datePlayers.filter((player) => player.tea > 0).sort(captainRanking)
     const winnerCaptainSide = ['blue', 'red'].find((side) =>
       latestMatch.teams[side].some((player) => player.name === winnerCandidates[0]?.name),
     )
-    const opponentSide = winnerCaptainSide === 'blue' ? 'red' : winnerCaptainSide === 'red' ? 'blue' : null
-    const opponentNames = opponentSide
-      ? new Set(latestMatch.teams[opponentSide].map((player) => player.name))
-      : null
-    const loserPool = datePlayers.filter(
-      (player) =>
-        player.name !== winnerCandidates[0]?.name && (!opponentNames || opponentNames.has(player.name)),
-    )
-    const loserCandidates = [...loserPool].sort(
-      (a, b) =>
-        b.mvp + b.fmvp - (a.mvp + a.fmvp) || b.mvp - a.mvp || b.avgRating - a.avgRating,
+    const loserCandidates = datePlayers
+      .filter((player) => player.treat > 0 && player.name !== winnerCandidates[0]?.name)
+      .sort(captainRanking)
+    const loserCaptainSide = ['blue', 'red'].find((side) =>
+      latestMatch.teams[side].some((player) => player.name === loserCandidates[0]?.name),
     )
 
-    captainSelection = {
-      sourceDate,
-      sourceMatchCount: matches.filter((match) => match.date === sourceDate).length,
-      winnerCaptain: winnerCandidates[0],
-      loserCaptain: loserCandidates[0],
-      referenceMatchId: latestMatch.id,
-      winnerCaptainSide,
-      loserCaptainSide: opponentSide,
-      winnerCandidates,
-      loserCandidates,
+    if (winnerCandidates.length && loserCandidates.length) {
+      captainSelection = {
+        sourceDate,
+        sourceMatchCount: matches.filter((match) => match.date === sourceDate).length,
+        winnerCaptain: winnerCandidates[0],
+        loserCaptain: loserCandidates[0],
+        referenceMatchId: latestMatch.id,
+        winnerCaptainSide,
+        loserCaptainSide,
+        winnerCandidates,
+        loserCandidates,
+      }
     }
   }
 
