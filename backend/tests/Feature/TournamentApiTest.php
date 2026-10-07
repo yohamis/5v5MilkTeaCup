@@ -55,10 +55,10 @@ class TournamentApiTest extends TestCase
     {
         $payload = json_decode(file_get_contents(base_path('../src/data/tournament.json')), true, flags: JSON_THROW_ON_ERROR);
         $summary = app(TournamentDataService::class)->import($payload);
-        $this->assertSame(['matches' => 41, 'players' => 18, 'records' => 410], $summary);
+        $this->assertSame(['matches' => 44, 'players' => 18, 'records' => 440], $summary);
         $response = $this->getJson('/api/tournament')->assertOk();
-        $this->assertCount(41, $response->json('matches'));
-        $this->assertSame('2026-08-30-a4', $response->json('matches.40.id'));
+        $this->assertCount(44, $response->json('matches'));
+        $this->assertSame('2026-09-30-a3', $response->json('matches.43.id'));
         $this->assertSame(
             $this->normaliseRatings($payload['matches']),
             $this->normaliseRatings($response->json('matches')),

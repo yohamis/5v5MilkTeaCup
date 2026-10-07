@@ -23,12 +23,15 @@ def checked(value):
 
 
 def main():
-    if len(sys.argv) != 3:
-        raise SystemExit("用法: python convert_excel.py <输入.xlsx> <输出.json>")
+    if len(sys.argv) not in (3, 4):
+        raise SystemExit("用法: python convert_excel.py <输入.xlsx> <输出.json> [已有完整数据.json]")
 
     source = Path(sys.argv[1])
     target = Path(sys.argv[2])
-    frame = pd.read_excel(source, sheet_name="比赛数据")
+    base = Path(sys.argv[3]) if len(sys.argv) == 4 else None
+    excel = pd.ExcelFile(source)
+    sheet_name = "比赛数据" if "比赛数据" in excel.sheet_names else excel.sheet_names[0]
+    frame = pd.read_excel(excel, sheet_name=sheet_name)
     frame = frame[frame["日期"].notna() & frame["玩家"].notna()].copy()
     corrections = []
 
@@ -102,16 +105,33 @@ def main():
             }
         )
 
+    base_payload = None
+    replaced_matches = 0
+    if base:
+        base_payload = json.loads(base.read_text(encoding="utf-8"))
+        merged_matches = {match["id"]: match for match in base_payload.get("matches", [])}
+        replaced_matches = sum(match["id"] in merged_matches for match in matches)
+        merged_matches.update({match["id"]: match for match in matches})
+        matches = sorted(merged_matches.values(), key=lambda match: (match["date"], match["round"]))
+
+        base_source = base_payload.get("source", {})
+        corrections = [*base_source.get("corrections", []), *corrections]
+        warnings = [*base_source.get("warnings", []), *warnings]
+
     payload = {
         "schemaVersion": 1,
-        "competition": {
-            "name": "王者荣耀 5V5 奶茶杯",
-            "shortName": "奶茶杯",
-            "season": "2026 夏季赛",
-        },
+        "competition": (base_payload or {}).get(
+            "competition",
+            {
+                "name": "王者荣耀 5V5 奶茶杯",
+                "shortName": "奶茶杯",
+                "season": "2026 夏季赛",
+            },
+        ),
         "source": {
             "file": source.name,
             "generatedAt": datetime.now().astimezone().isoformat(timespec="seconds"),
+            **({"baseFile": base.name} if base else {}),
             "corrections": corrections,
             "warnings": warnings,
         },
@@ -119,7 +139,11 @@ def main():
     }
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"已生成 {target}：{len(matches)} 场，{len(frame)} 条选手记录，{len(warnings)} 条警告")
+    record_count = sum(len(match["teams"][side]) for match in matches for side in ("blue", "red"))
+    print(
+        f"已生成 {target}：新增 {len(grouped)} 场，覆盖 {replaced_matches} 场，"
+        f"合计 {len(matches)} 场、{record_count} 条选手记录，{len(warnings)} 条警告"
+    )
 
 
 if __name__ == "__main__":
