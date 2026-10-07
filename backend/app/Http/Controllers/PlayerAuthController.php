@@ -28,7 +28,9 @@ class PlayerAuthController extends Controller
             $player->pin_hash = Hash::make($data['pin']);
         }
         $token = Str::random(48);
-        $player->api_token_hash = hash('sha256', $token);
+        $tokenHash = hash('sha256', $token);
+        $player->apiTokens()->create(['token_hash' => $tokenHash]);
+        $player->api_token_hash = $tokenHash;
         $player->save();
 
         return response()->json(['token' => $token, 'player' => $player]);
@@ -42,7 +44,14 @@ class PlayerAuthController extends Controller
     public function logout(Request $request): JsonResponse
     {
         $player = $request->attributes->get('player');
-        $player->update(['api_token_hash' => null]);
+        $playerApiToken = $request->attributes->get('playerApiToken');
+        $tokenHash = $playerApiToken->token_hash;
+
+        $playerApiToken->delete();
+
+        if ($player->api_token_hash === $tokenHash) {
+            $player->update(['api_token_hash' => null]);
+        }
 
         return response()->json(['message' => '已退出']);
     }

@@ -27,6 +27,16 @@ const adminMatchId = ref('')
 const adminMatchJson = ref('')
 const eventForm = ref({ event_date: '', title: '奶茶杯日常赛', capacity: 10, waitlist_capacity: 5, status: 'open' })
 
+function clearPlayerSession() {
+  playerSession.value = null
+  localStorage.removeItem('milkTeaPlayerSession')
+}
+
+function savePlayerSession(session) {
+  playerSession.value = session
+  localStorage.setItem('milkTeaPlayerSession', JSON.stringify(session))
+}
+
 const stats = computed(() => calculateStats(tournament.value))
 const warnings = computed(() => [
   ...(tournament.value.source?.warnings || []),
@@ -76,11 +86,34 @@ const views = [
 async function api(path, options = {}) {
   if (!apiBase) throw new Error('报名后端尚未配置')
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) }
-  if (playerSession.value?.token) headers.Authorization = `Bearer ${playerSession.value.token}`
+  const playerToken = playerSession.value?.token
+  if (playerToken) headers.Authorization = `Bearer ${playerToken}`
   const response = await fetch(`${apiBase}${path}`, { ...options, headers })
   const body = await response.json().catch(() => ({}))
-  if (!response.ok) throw new Error(body.message || '请求失败')
+  if (!response.ok) {
+    const error = new Error(body.message || '请求失败')
+    error.status = response.status
+    if (response.status === 401 && playerToken) {
+      clearPlayerSession()
+      error.message = '登录状态已失效，请重新登录'
+    }
+    throw error
+  }
   return body
+}
+
+async function restorePlayerSession() {
+  if (!playerSession.value?.token) {
+    if (playerSession.value) clearPlayerSession()
+    return
+  }
+
+  try {
+    const result = await api('/api/auth/me')
+    savePlayerSession({ token: playerSession.value.token, player: result.player })
+  } catch (error) {
+    if (error.status === 401) signupMessage.value = error.message
+  }
 }
 
 async function loadBackend() {
@@ -100,8 +133,7 @@ async function loginPlayer() {
   signupMessage.value = ''
   try {
     const session = await api('/api/auth/player', { method: 'POST', body: JSON.stringify(loginForm.value) })
-    playerSession.value = session
-    localStorage.setItem('milkTeaPlayerSession', JSON.stringify(session))
+    savePlayerSession(session)
     signupMessage.value = `欢迎，${session.player.name}`
   } catch (error) { signupMessage.value = error.message } finally { signupLoading.value = false }
 }
@@ -126,8 +158,7 @@ async function cancelRegistration(event) {
 
 async function logoutPlayer() {
   try { await api('/api/auth/logout', { method: 'POST' }) } catch { /* 本地仍然退出 */ }
-  playerSession.value = null
-  localStorage.removeItem('milkTeaPlayerSession')
+  clearPlayerSession()
 }
 
 function saveAdminKey() {
@@ -180,7 +211,10 @@ async function createEvent() {
   } catch (error) { adminMessage.value = error.message } finally { adminLoading.value = false }
 }
 
-onMounted(loadBackend)
+onMounted(async () => {
+  await restorePlayerSession()
+  await loadBackend()
+})
 
 function teamKills(team) {
   return team.reduce((sum, player) => sum + Number(player.kills || 0), 0)

@@ -118,6 +118,57 @@ class TournamentApiTest extends TestCase
         $this->assertDatabaseCount('registrations', 0);
     }
 
+    public function test_logging_in_on_another_device_keeps_both_player_sessions_valid(): void
+    {
+        $firstLogin = $this->postJson('/api/auth/player', [
+            'name' => '双设备玩家',
+            'pin' => '123456',
+            'new_player' => true,
+        ])->assertOk()->json();
+        $secondLogin = $this->postJson('/api/auth/player', [
+            'name' => '双设备玩家',
+            'pin' => '123456',
+            'new_player' => false,
+        ])->assertOk()->json();
+
+        $this->withToken($firstLogin['token'])
+            ->getJson('/api/auth/me')
+            ->assertOk()
+            ->assertJsonPath('player.name', '双设备玩家');
+        $this->withToken($secondLogin['token'])
+            ->getJson('/api/auth/me')
+            ->assertOk()
+            ->assertJsonPath('player.name', '双设备玩家');
+
+        $this->assertDatabaseCount('player_api_tokens', 2);
+    }
+
+    public function test_logout_only_revokes_the_current_device_session(): void
+    {
+        $firstToken = $this->postJson('/api/auth/player', [
+            'name' => '独立退出玩家',
+            'pin' => '123456',
+            'new_player' => true,
+        ])->assertOk()->json('token');
+        $secondToken = $this->postJson('/api/auth/player', [
+            'name' => '独立退出玩家',
+            'pin' => '123456',
+            'new_player' => false,
+        ])->assertOk()->json('token');
+
+        $this->withToken($firstToken)
+            ->postJson('/api/auth/logout')
+            ->assertOk()
+            ->assertJsonPath('message', '已退出');
+        $this->withToken($firstToken)->getJson('/api/auth/me')->assertUnauthorized();
+        $this->withToken($secondToken)
+            ->getJson('/api/auth/me')
+            ->assertOk()
+            ->assertJsonPath('player.name', '独立退出玩家');
+
+        $this->assertDatabaseCount('player_api_tokens', 1);
+    }
+
     private function normaliseRatings(array $matches): array
     {
         foreach ($matches as &$match) {
