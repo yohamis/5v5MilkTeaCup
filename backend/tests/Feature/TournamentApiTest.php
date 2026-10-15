@@ -91,8 +91,10 @@ class TournamentApiTest extends TestCase
         $second = $this->postJson('/api/auth/player', ['name' => '二号', 'pin' => '1234', 'new_player' => true])->json('token');
         $this->withToken($first)->postJson("/api/events/{$event->id}/register")->assertJsonPath('registration.status', 'registered');
         $this->withToken($second)->postJson("/api/events/{$event->id}/register")->assertJsonPath('registration.status', 'waitlist');
+        $this->withToken($first)->putJson("/api/events/{$event->id}/decider-vote", ['mode' => 'ranked'])->assertOk();
         $this->withToken($first)->deleteJson("/api/events/{$event->id}/register")->assertOk();
         $this->assertDatabaseHas('registrations', ['match_event_id' => $event->id, 'status' => 'registered', 'player_id' => 2]);
+        $this->assertDatabaseHas('registrations', ['match_event_id' => $event->id, 'status' => 'cancelled', 'player_id' => 1, 'decider_vote' => null]);
     }
 
     public function test_returns_422_when_admin_upload_is_not_json(): void

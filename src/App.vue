@@ -15,6 +15,11 @@ const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
 const signupEvents = ref([])
 const signupMessage = ref('')
 const signupLoading = ref(false)
+const rulesDialogOpen = ref(false)
+const rulesDialogEvent = ref(null)
+const deciderVoteChoice = ref('')
+const deciderVoteMessage = ref('')
+const deciderVoteLoading = ref(false)
 const storedPlayerSession = localStorage.getItem('milkTeaPlayerSession')
 let initialPlayerSession = null
 try { initialPlayerSession = storedPlayerSession ? JSON.parse(storedPlayerSession) : null } catch { localStorage.removeItem('milkTeaPlayerSession') }
@@ -70,8 +75,30 @@ function eventRegistrations(event, status) {
   return event.registrations.filter((item) => item.status === status)
 }
 
+function playerRegistration(event) {
+  return event.registrations.find((item) => isCurrentPlayer(item)) || null
+}
+
 function isCurrentPlayer(item) {
   return item.player_id === playerSession.value?.player.id
+}
+
+function eventVoteSummary(event) {
+  return event.decider_vote_summary || {
+    registered_count: eventRegistrations(event, 'registered').length,
+    required_votes: event.capacity,
+    voted_count: 0,
+    remaining_votes: event.capacity,
+    matchmaking_count: 0,
+    ranked_count: 0,
+    status: 'waiting_roster',
+    result: null,
+    tie_break_applied: false,
+  }
+}
+
+function deciderModeLabel(mode) {
+  return mode === 'matchmaking' ? '匹配模式' : mode === 'ranked' ? '排位模式' : '等待结果'
 }
 
 const views = [
@@ -144,6 +171,8 @@ async function registerEvent(event) {
     const result = await api(`/api/events/${event.id}/register`, { method: 'POST', body: '{}' })
     signupMessage.value = result.registration.status === 'registered' ? '报名成功' : '正赛已满，已进入候补'
     await loadBackend()
+    const refreshedEvent = signupEvents.value.find((item) => item.id === event.id) || event
+    await openRulesDialog(refreshedEvent)
   } catch (error) { signupMessage.value = error.message } finally { signupLoading.value = false }
 }
 
@@ -156,9 +185,53 @@ async function cancelRegistration(event) {
   } catch (error) { signupMessage.value = error.message } finally { signupLoading.value = false }
 }
 
+async function openRulesDialog(event) {
+  rulesDialogEvent.value = event
+  rulesDialogOpen.value = true
+  deciderVoteMessage.value = ''
+  deciderVoteChoice.value = ''
+
+  if (playerRegistration(event)?.status !== 'registered') return
+
+  try {
+    const result = await api(`/api/events/${event.id}/decider-vote`)
+    deciderVoteChoice.value = result.vote || ''
+    rulesDialogEvent.value.decider_vote_summary = result.summary
+  } catch (error) {
+    deciderVoteMessage.value = error.message
+  }
+}
+
+function closeRulesDialog() {
+  rulesDialogOpen.value = false
+  deciderVoteMessage.value = ''
+}
+
+async function submitDeciderVote() {
+  if (!rulesDialogEvent.value || !deciderVoteChoice.value) return
+  deciderVoteLoading.value = true
+  deciderVoteMessage.value = ''
+
+  try {
+    const result = await api(`/api/events/${rulesDialogEvent.value.id}/decider-vote`, {
+      method: 'PUT',
+      body: JSON.stringify({ mode: deciderVoteChoice.value }),
+    })
+    rulesDialogEvent.value.decider_vote_summary = result.summary
+    const registration = playerRegistration(rulesDialogEvent.value)
+    if (registration) registration.has_decider_vote = true
+    deciderVoteMessage.value = `${result.message}：${deciderModeLabel(result.vote)}`
+  } catch (error) {
+    deciderVoteMessage.value = error.message
+  } finally {
+    deciderVoteLoading.value = false
+  }
+}
+
 async function logoutPlayer() {
   try { await api('/api/auth/logout', { method: 'POST' }) } catch { /* 本地仍然退出 */ }
   clearPlayerSession()
+  closeRulesDialog()
 }
 
 function saveAdminKey() {
@@ -587,11 +660,36 @@ async function loadJson(event) {
                 </div>
               </div>
 
+              <div class="event-vote-brief">
+                <div>
+                  <small>GAME 5 · DECIDER PROTOCOL</small>
+                  <b>决胜局模式票决</b>
+                  <p>正式席位满员并完成全员投票后锁定结果。</p>
+                </div>
+                <div class="event-vote-progress">
+                  <span><b>{{ eventVoteSummary(event).voted_count }}</b> / {{ eventVoteSummary(event).required_votes }} 已投</span>
+                  <div><i :style="{ width: `${Math.min(100, eventVoteSummary(event).voted_count / Math.max(1, eventVoteSummary(event).required_votes) * 100)}%` }"></i></div>
+                  <strong v-if="eventVoteSummary(event).status === 'decided'">
+                    {{ deciderModeLabel(eventVoteSummary(event).result) }}
+                    <small v-if="eventVoteSummary(event).tie_break_applied">5:5 平票保底</small>
+                  </strong>
+                  <em v-else>还需 {{ eventVoteSummary(event).remaining_votes }} 票</em>
+                </div>
+              </div>
+
               <div class="event-actions">
                 <div><small>{{ playerSession ? 'YOUR STATUS' : 'PLAYER ACCESS REQUIRED' }}</small><b v-if="playerSession">{{ event.registrations.some(item => isCurrentPlayer(item)) ? '你已在今日名单中' : '今日尚未报名' }}</b><b v-else>登录后即可占领席位</b></div>
-                <button v-if="playerSession && !event.registrations.some(item => isCurrentPlayer(item))" type="button" :disabled="signupLoading || event.status !== 'open'" @click="registerEvent(event)"><span>{{ eventRegistrations(event, 'registered').length >= event.capacity ? '加入候补队列' : '立即报名，占领席位' }}</span><i>→</i></button>
-                <button v-else-if="playerSession" class="cancel" type="button" :disabled="signupLoading" @click="cancelRegistration(event)">取消今日报名</button>
-                <span v-else class="login-hint">请先完成上方身份确认</span>
+                <div class="event-action-buttons">
+                  <button v-if="playerSession && !event.registrations.some(item => isCurrentPlayer(item))" type="button" :disabled="signupLoading || event.status !== 'open'" @click="registerEvent(event)"><span>{{ eventRegistrations(event, 'registered').length >= event.capacity ? '加入候补队列' : '立即报名，占领席位' }}</span><i>→</i></button>
+                  <template v-else-if="playerSession">
+                    <button class="rules" type="button" @click="openRulesDialog(event)">{{ playerRegistration(event)?.status === 'registered' && !playerRegistration(event)?.has_decider_vote ? '阅读规则并投票' : '查看赛制与投票' }}</button>
+                    <button class="cancel" type="button" :disabled="signupLoading" @click="cancelRegistration(event)">取消今日报名</button>
+                  </template>
+                  <template v-else>
+                    <button class="rules" type="button" @click="openRulesDialog(event)">查看今日赛制</button>
+                    <span class="login-hint">请先完成上方身份确认</span>
+                  </template>
+                </div>
               </div>
             </article>
             <div v-if="!signupEvents.length" class="signup-empty"><span>◇</span><b>今日战场正在开启</b><p>场次准备完成后会在这里显示，请稍后刷新页面。</p></div>
@@ -641,6 +739,112 @@ async function loadJson(event) {
         </template>
       </section>
     </main>
+
+    <Teleport to="body">
+      <div v-if="rulesDialogOpen && rulesDialogEvent" class="rules-dialog-backdrop" @click.self="closeRulesDialog">
+        <section class="rules-dialog" role="dialog" aria-modal="true" aria-labelledby="rules-dialog-title">
+          <header class="rules-dialog-header">
+            <div>
+              <p class="eyebrow">MATCH ORDER · BO5</p>
+              <h2 id="rules-dialog-title">今日比赛规则确认</h2>
+              <p>{{ rulesDialogEvent.event_date }} · {{ rulesDialogEvent.title }}</p>
+            </div>
+            <button type="button" aria-label="关闭比赛规则" @click="closeRulesDialog">×</button>
+          </header>
+
+          <div class="rules-dialog-body">
+            <section class="captain-order">
+              <div class="rules-section-title">
+                <span>01</span>
+                <div><small>CAPTAIN CONTINUATION</small><h3>延续上轮时的双方队长</h3></div>
+              </div>
+              <p v-if="stats.captainSelection" class="rule-explainer">
+                如果今天沿用最近比赛日 {{ stats.captainSelection.sourceDate }} 的分队结果，上轮败方在第一局进入蓝色方并先手选英雄。
+              </p>
+              <p v-else class="rule-explainer">当前没有可引用的上一轮比赛结果，双方队长与第一局蓝色方需在开赛前现场确认。</p>
+              <div v-if="stats.captainSelection" class="captain-order-grid">
+                <article>
+                  <small>上轮胜方队长</small>
+                  <b>{{ stats.captainSelection.winnerCaptain.name }}</b>
+                  <span>守擂方</span>
+                </article>
+                <i>VS</i>
+                <article class="blue-first">
+                  <small>上轮败方队长</small>
+                  <b>{{ stats.captainSelection.loserCaptain.name }}</b>
+                  <span>首局蓝方 · 先手</span>
+                </article>
+              </div>
+            </section>
+
+            <section class="bo5-order">
+              <div class="rules-section-title">
+                <span>02</span>
+                <div><small>SERIES FORMAT</small><h3>BO5 对局流程</h3></div>
+              </div>
+              <p class="rule-explainer">先赢 3 局的一方获胜。第一至第四局执行常规排位征召；每局结束后，败方在下一局进入蓝色方并获得先手选英雄权。</p>
+              <div class="bo5-track" aria-label="BO5 对局流程">
+                <div v-for="game in 4" :key="game"><small>GAME {{ game }}</small><b>排位 BP</b><span>败方下局蓝方</span></div>
+                <div class="decider"><small>GAME 5</small><b>全员票决</b><span>仅 2:2 时启用</span></div>
+              </div>
+            </section>
+
+            <section class="decider-order">
+              <div class="rules-section-title">
+                <span>03</span>
+                <div><small>DECIDER VOTE</small><h3>第五局模式投票</h3></div>
+              </div>
+              <p class="rule-explainer">只有正式席位的 10 名选手参与投票。报名开放期间可以修改选择；报名关闭后票数锁定。</p>
+
+              <div class="decider-options">
+                <label :class="{ selected: deciderVoteChoice === 'matchmaking' }">
+                  <input v-model="deciderVoteChoice" type="radio" value="matchmaking" :disabled="playerRegistration(rulesDialogEvent)?.status !== 'registered' || rulesDialogEvent.status !== 'open'" />
+                  <span>方案 A</span>
+                  <b>匹配模式</b>
+                  <p>不进行 Ban/Pick，不限制英雄选择；双方直接自由选择英雄进入决胜局。</p>
+                </label>
+                <label :class="{ selected: deciderVoteChoice === 'ranked' }">
+                  <input v-model="deciderVoteChoice" type="radio" value="ranked" :disabled="playerRegistration(rulesDialogEvent)?.status !== 'registered' || rulesDialogEvent.status !== 'open'" />
+                  <span>方案 B · 平票默认</span>
+                  <b>排位模式</b>
+                  <p>第四局败方进入蓝色方并先手；Ban 位全部留空，不增加额外 Pick 限制，双方自由选择英雄。</p>
+                </label>
+              </div>
+
+              <div class="tie-rule"><b>5:5 如何处理？</b><p>平票时直接采用排位模式。队长已经包含在 10 名投票选手中，不设置额外队长票，确保每人一票。</p></div>
+
+              <div class="vote-board">
+                <header><span>投票进度</span><b>{{ eventVoteSummary(rulesDialogEvent).voted_count }} / {{ eventVoteSummary(rulesDialogEvent).required_votes }}</b></header>
+                <div class="vote-bars">
+                  <div><span>匹配模式</span><i><b :style="{ width: `${eventVoteSummary(rulesDialogEvent).matchmaking_count / Math.max(1, eventVoteSummary(rulesDialogEvent).required_votes) * 100}%` }"></b></i><strong>{{ eventVoteSummary(rulesDialogEvent).matchmaking_count }}</strong></div>
+                  <div><span>排位模式</span><i><b :style="{ width: `${eventVoteSummary(rulesDialogEvent).ranked_count / Math.max(1, eventVoteSummary(rulesDialogEvent).required_votes) * 100}%` }"></b></i><strong>{{ eventVoteSummary(rulesDialogEvent).ranked_count }}</strong></div>
+                </div>
+                <p v-if="eventVoteSummary(rulesDialogEvent).status === 'decided'" class="vote-decision">
+                  决胜局采用：<b>{{ deciderModeLabel(eventVoteSummary(rulesDialogEvent).result) }}</b>
+                  <span v-if="eventVoteSummary(rulesDialogEvent).tie_break_applied">（5:5 平票规则生效）</span>
+                </p>
+                <p v-else class="vote-pending">还需 {{ eventVoteSummary(rulesDialogEvent).remaining_votes }} 名正式席位选手完成投票。</p>
+              </div>
+
+              <p v-if="deciderVoteMessage" class="decider-vote-message">{{ deciderVoteMessage }}</p>
+              <p v-else-if="playerRegistration(rulesDialogEvent)?.status === 'waitlist'" class="decider-vote-message">你当前在候补队列，晋级正式席位后即可投票。</p>
+              <p v-else-if="!playerSession" class="decider-vote-message">登录并报名正式席位后即可参与投票。</p>
+            </section>
+          </div>
+
+          <footer class="rules-dialog-actions">
+            <button class="secondary" type="button" @click="closeRulesDialog">稍后再看</button>
+            <button
+              type="button"
+              :disabled="deciderVoteLoading || !deciderVoteChoice || playerRegistration(rulesDialogEvent)?.status !== 'registered' || rulesDialogEvent.status !== 'open'"
+              @click="submitDeciderVote"
+            >
+              {{ deciderVoteLoading ? '正在记录…' : playerRegistration(rulesDialogEvent)?.has_decider_vote ? '更新我的投票' : '确认规则并投票' }}
+            </button>
+          </footer>
+        </section>
+      </div>
+    </Teleport>
 
     <footer><span>奶茶杯赛事数据台</span><p>比赛数据由 Laravel API 自动同步；未配置后端时使用内置 JSON。</p></footer>
 

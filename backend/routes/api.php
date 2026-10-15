@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\DeciderVoteController;
 use App\Http\Controllers\PlayerAuthController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\TournamentController;
@@ -14,6 +15,8 @@ Route::middleware('player.token')->group(function () {
     Route::post('/auth/logout', [PlayerAuthController::class, 'logout']);
     Route::post('/events/{event}/register', [RegistrationController::class, 'store']);
     Route::delete('/events/{event}/register', [RegistrationController::class, 'destroy']);
+    Route::get('/events/{event}/decider-vote', [DeciderVoteController::class, 'show']);
+    Route::put('/events/{event}/decider-vote', [DeciderVoteController::class, 'update']);
 });
 Route::prefix('admin')->middleware('admin.key')->group(function () {
     Route::post('/tournament/import', [AdminController::class, 'import']);

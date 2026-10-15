@@ -10,7 +10,9 @@ class Registration extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['match_event_id', 'player_id', 'status', 'note'];
+    protected $fillable = ['match_event_id', 'player_id', 'status', 'note', 'decider_vote'];
+
+    protected $hidden = ['decider_vote'];
 
     public function player(): BelongsTo
     {

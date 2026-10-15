@@ -6,18 +6,33 @@ use App\Http\Requests\RegisterEventRequest;
 use App\Models\MatchEvent;
 use App\Models\Registration;
 use App\Services\DailyMatchEventService;
+use App\Services\DeciderVoteService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class RegistrationController extends Controller
 {
-    public function index(DailyMatchEventService $dailyMatchEventService): JsonResponse
-    {
+    public function index(
+        DailyMatchEventService $dailyMatchEventService,
+        DeciderVoteService $deciderVoteService,
+    ): JsonResponse {
         $dailyMatchEventService->ensureToday();
 
-        $events = MatchEvent::with(['registrations' => fn ($q) => $q->whereIn('status', ['registered', 'waitlist'])->with('player:id,name')])
-            ->where('event_date', '>=', today()->toDateString())->orderBy('event_date')->get();
+        $events = MatchEvent::with(['registrations' => fn ($query) => $query
+            ->whereIn('status', ['registered', 'waitlist'])
+            ->with('player:id,name')
+            ->oldest()
+            ->orderBy('id')])
+            ->where('event_date', '>=', today()->toDateString())
+            ->orderBy('event_date')
+            ->get()
+            ->each(function (MatchEvent $event) use ($deciderVoteService): void {
+                $event->setAttribute('decider_vote_summary', $deciderVoteService->summary($event));
+                $event->registrations->each(function (Registration $registration): void {
+                    $registration->setAttribute('has_decider_vote', $registration->decider_vote !== null);
+                });
+            });
 
         return response()->json(['events' => $events]);
     }
@@ -57,7 +72,7 @@ class RegistrationController extends Controller
             MatchEvent::lockForUpdate()->findOrFail($event->id);
             $registration = Registration::where('match_event_id', $event->id)->where('player_id', $player->id)->first();
             $wasRegistered = $registration?->status === 'registered';
-            $registration?->update(['status' => 'cancelled']);
+            $registration?->update(['status' => 'cancelled', 'decider_vote' => null]);
             if ($wasRegistered) {
                 Registration::where('match_event_id', $event->id)->where('status', 'waitlist')->oldest()->first()?->update(['status' => 'registered']);
             }
