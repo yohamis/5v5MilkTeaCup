@@ -1,5 +1,6 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import AppIcon from './components/AppIcon.vue'
 import initialData from './data/tournament.json'
 import { calculateStats, formatDate, formatPercent, LANES, validateData } from './lib/stats'
 
@@ -31,6 +32,33 @@ const adminLoading = ref(false)
 const adminMatchId = ref('')
 const adminMatchJson = ref('')
 const eventForm = ref({ event_date: '', title: '奶茶杯日常赛', capacity: 10, waitlist_capacity: 5, status: 'open' })
+let rulesPreviousFocus = null
+let rulesPreviousOverflow = ''
+
+watch(activeView, () => window.scrollTo({ top: 0, behavior: 'instant' }))
+watch(rulesDialogOpen, async (open) => {
+  if (open) {
+    rulesPreviousFocus = document.activeElement
+    rulesPreviousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    await nextTick()
+    document.querySelector('.rules-dialog-header > button')?.focus({ preventScroll: true })
+  } else {
+    document.body.style.overflow = rulesPreviousOverflow
+    rulesPreviousFocus?.focus({ preventScroll: true })
+  }
+})
+onUnmounted(() => { document.body.style.overflow = rulesPreviousOverflow })
+
+function handleRulesKeydown(event) {
+  if (event.key === 'Escape') closeRulesDialog()
+  if (event.key !== 'Tab') return
+  const buttons = [...event.currentTarget.querySelectorAll('button:not(:disabled), input:not(:disabled)')]
+  const first = buttons[0]
+  const last = buttons[buttons.length - 1]
+  if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus() }
+  if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus() }
+}
 
 function clearPlayerSession() {
   playerSession.value = null
@@ -296,7 +324,16 @@ function teamKills(team) {
 function openPlayer(name) {
   selectedPlayerName.value = name
   activeView.value = 'players'
-  window.scrollTo({ top: 0, behavior: 'smooth' })
+  scrollToPlayer()
+}
+
+function selectPlayer(name) {
+  selectedPlayerName.value = name
+  if (window.matchMedia('(max-width: 700px)').matches) scrollToPlayer()
+}
+
+function scrollToPlayer() {
+  window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })
 }
 
 async function loadJson(event) {
@@ -320,8 +357,8 @@ async function loadJson(event) {
   <div class="app-shell">
     <header class="topbar">
       <button class="brand" type="button" @click="activeView = 'overview'" aria-label="回到赛场总览">
-        <span class="brand-mark"><i></i><i></i><i></i></span>
-        <span><b>奶茶杯</b><small>KING'S BATTLE ARENA</small></span>
+        <span class="brand-mark"><AppIcon name="cup" /></span>
+        <span><b>奶茶杯<span class="brand-dot">.</span></b><small>一起开黑，一起喝茶</small></span>
       </button>
 
       <nav class="desktop-nav" aria-label="主导航">
@@ -336,10 +373,7 @@ async function loadJson(event) {
         </button>
       </nav>
 
-      <label class="upload-button">
-        <input type="file" accept="application/json,.json" @change="loadJson" />
-        <span>载入新赛季 JSON</span>
-      </label>
+      <button class="topbar-manage" type="button" aria-label="赛事管理" @click="activeView = 'admin'"><AppIcon name="admin" /><span>赛事管理</span></button>
     </header>
 
     <main>
@@ -351,42 +385,34 @@ async function loadJson(event) {
       <section v-if="activeView === 'overview'" class="view view-overview">
         <div class="hero">
           <div class="hero-copy">
-            <p class="eyebrow">{{ tournament.competition.season }} · 荣耀战场</p>
-            <h1>峡谷争锋，<br /><em>王者登榜。</em></h1>
+            <p class="eyebrow"><span class="live-dot"></span> {{ tournament.competition.season }} · 5V5 好友赛</p>
+            <h1>今天的奶茶，<br /><em>峡谷里见。</em></h1>
             <p class="hero-intro">
-              每一次出征都会写进战绩。分路榜、荣誉榜、选手实力与下场队长，全部由真实对局自动推演。最新战报截止
-              {{ stats.overview.latestDate }}。
+              十个朋友，两支队伍。把每一场高光，留在奶茶杯。
             </p>
             <div class="hero-actions">
-              <button class="primary-button" type="button" @click="activeView = 'matches'">查看最近对战</button>
-              <button class="text-button" type="button" @click="activeView = 'players'">打开选手评分 →</button>
+              <button class="primary-button" type="button" @click="activeView = 'signup'">报名下一场 <AppIcon name="arrow" /></button>
+              <button class="text-button" type="button" @click="activeView = 'matches'">看看最近战绩 ↗</button>
             </div>
           </div>
 
-          <div class="cup-scoreboard" aria-label="赛事数据摘要">
-            <div class="cup-lid"></div>
-            <div class="cup-body">
-              <div class="cup-label">
-                <small>荣耀赛季</small>
-                <strong>{{ stats.overview.matchCount }}</strong>
-                <span>场峡谷征战</span>
-              </div>
-              <div class="pearls" aria-hidden="true">
-                <i v-for="n in 10" :key="n"></i>
-              </div>
-            </div>
-            <div class="cup-meta">
-              <span><b>{{ stats.overview.playerCount }}</b> 位选手</span>
-              <span><b>{{ stats.overview.recordCount }}</b> 条评分</span>
-            </div>
+          <div class="match-ticket" aria-label="奶茶杯五对五好友赛">
+            <div class="ticket-head"><span>MILK TEA CUP</span><span>好友局 / BO5</span></div>
+            <div class="ticket-lineup blue"><i v-for="n in 5" :key="n"></i></div>
+            <div class="ticket-versus"><span>5</span><AppIcon name="cup" /><span>5</span></div>
+            <div class="ticket-lineup orange"><i v-for="n in 5" :key="n"></i></div>
+            <div class="ticket-bottom"><span>胜负有时 · 快乐常在</span><b>LET’S PLAY ↗</b></div>
           </div>
         </div>
+
+        <div class="season-summary"><div><b>{{ stats.overview.matchCount }}</b><span>场精彩对局</span></div><div><b>{{ stats.overview.playerCount }}</b><span>位参赛好友</span></div><div><b>{{ stats.overview.recordCount }}</b><span>条高光记录</span></div><small>战报更新至 {{ stats.overview.latestDate }}</small></div>
+        <div class="quick-links"><button v-for="view in views.filter(item => ['matches', 'honors', 'players', 'signup'].includes(item.id))" :key="view.id" type="button" @click="activeView = view.id"><span><AppIcon :name="view.id" /></span><b>{{ view.label }}</b><small>{{ {matches: '每场都值得回味', honors: '看看谁是 MVP', players: '发现你的拿手分路', signup: '下一场等你来'}[view.id] }}</small></button></div>
 
         <section v-if="stats.captainSelection" class="captain-section">
           <div class="captain-heading">
             <div>
               <p class="eyebrow">NEXT BATTLE · CAPTAIN DRAFT</p>
-              <h2>下场双队长</h2>
+              <h2>下一场，谁带队？</h2>
             </div>
             <p>
               只统计最近比赛日 {{ stats.captainSelection.sourceDate }} 的全部
@@ -561,7 +587,7 @@ async function loadJson(event) {
               :key="player.name"
               :class="['player-table-row', { selected: selectedPlayer.name === player.name }]"
               type="button"
-              @click="selectedPlayerName = player.name"
+              @click="selectPlayer(player.name)"
             >
               <span class="player-cell"><i>{{ player.rank }}</i><b>{{ player.name }}</b></span><span>{{ player.matches }}</span><span>{{ formatPercent(player.winRate) }}</span><span>{{ player.mvp }}</span><span>{{ player.fmvp }}</span><strong>{{ player.powerScore.toFixed(2) }}</strong>
             </button>
@@ -581,8 +607,8 @@ async function loadJson(event) {
           <div class="signup-command-copy">
             <div class="signup-live"><i></i><span>DAILY ASSEMBLY · 每日自动开放</span></div>
             <p class="eyebrow">MILK TEA CUP · 5V5</p>
-            <h1>今日，<em>集结王者</em></h1>
-            <p>无需等待开房通知。确认选手身份，占领今日席位；满 10 人即可组织奶茶杯对局。</p>
+            <h1>今晚开黑，<em>就差你了。</em></h1>
+            <p>每天自动开放报名，满 10 人就能组局。带上拿手英雄，和朋友一起争夺下一杯奶茶。</p>
             <div class="signup-hero-meta">
               <span><small>今日场次</small><b>{{ primarySignupEvent ? '已开放' : '准备中' }}</b></span>
               <span><small>集结人数</small><b>{{ primarySignupEvent ? eventRegistrations(primarySignupEvent, 'registered').length : 0 }} / {{ primarySignupEvent?.capacity || 10 }}</b></span>
@@ -590,7 +616,7 @@ async function loadJson(event) {
             </div>
           </div>
           <div class="signup-war-order" aria-hidden="true">
-            <div class="war-order-ring"><span>5<small>V</small>5</span><b>集结令</b></div>
+            <div class="war-order-ring"><AppIcon name="cup" /><b>好朋友 · 好对局</b></div>
             <i class="war-order-wing left"></i><i class="war-order-wing right"></i>
             <p>荣耀峡谷 · 奶茶杯</p>
           </div>
@@ -612,8 +638,8 @@ async function loadJson(event) {
             </div>
             <form class="signup-login" @submit.prevent="loginPlayer">
               <header><small>PLAYER ACCESS</small><h2>{{ loginForm.new_player ? '创建新玩家' : '选手登录' }}</h2><p>{{ loginForm.new_player ? '第一次参赛？现在建立你的选手档案。' : '欢迎归队，登录后即可占领今日席位。' }}</p></header>
-              <label>玩家昵称<input v-model.trim="loginForm.name" maxlength="50" placeholder="输入比赛常用昵称" /></label>
-              <label>报名 PIN<input v-model="loginForm.pin" inputmode="numeric" maxlength="12" type="password" placeholder="4—12 位数字" /></label>
+              <label>玩家昵称<input v-model.trim="loginForm.name" autocomplete="username" maxlength="50" placeholder="输入比赛常用昵称" /></label>
+              <label>报名 PIN<input v-model="loginForm.pin" :autocomplete="loginForm.new_player ? 'new-password' : 'current-password'" inputmode="numeric" maxlength="12" type="password" placeholder="4—12 位数字" /></label>
               <label class="signup-check"><input v-model="loginForm.new_player" type="checkbox" /><span><b>我是第一次参加</b><small>创建新玩家档案并继续报名</small></span></label>
               <button type="submit" :disabled="signupLoading"><span>{{ signupLoading ? '身份确认中…' : loginForm.new_player ? '创建档案并进入' : '确认身份，进入战场' }}</span><i>→</i></button>
             </form>
@@ -664,7 +690,7 @@ async function loadJson(event) {
                 <div>
                   <small>GAME 5 · DECIDER PROTOCOL</small>
                   <b>决胜局模式票决</b>
-                  <p>正式席位满员并完成全员投票后锁定结果。</p>
+                  <p>全员投票后显示结果，报名关闭后锁定。</p>
                 </div>
                 <div class="event-vote-progress">
                   <span><b>{{ eventVoteSummary(event).voted_count }}</b> / {{ eventVoteSummary(event).required_votes }} 已投</span>
@@ -741,7 +767,7 @@ async function loadJson(event) {
     </main>
 
     <Teleport to="body">
-      <div v-if="rulesDialogOpen && rulesDialogEvent" class="rules-dialog-backdrop" @click.self="closeRulesDialog">
+      <div v-if="rulesDialogOpen && rulesDialogEvent" class="rules-dialog-backdrop" @click.self="closeRulesDialog" @keydown="handleRulesKeydown">
         <section class="rules-dialog" role="dialog" aria-modal="true" aria-labelledby="rules-dialog-title">
           <header class="rules-dialog-header">
             <div>
@@ -846,10 +872,10 @@ async function loadJson(event) {
       </div>
     </Teleport>
 
-    <footer><span>奶茶杯赛事数据台</span><p>比赛数据由 Laravel API 自动同步；未配置后端时使用内置 JSON。</p></footer>
+    <footer class="site-footer"><span>奶茶杯 · 和朋友认真玩一场</span><p>胜负有时，快乐常在。</p><label class="upload-button"><input type="file" accept="application/json,.json" @change="loadJson" /><span>预览 JSON</span></label></footer>
 
     <nav class="mobile-nav" aria-label="移动端主导航">
-      <button v-for="view in views" :key="view.id" :class="{ active: activeView === view.id }" type="button" @click="activeView = view.id"><span>{{ { overview: '⌂', matches: '▤', honors: '✦', players: '♙', signup: '✓', admin: '⚙' }[view.id] }}</span>{{ view.short }}</button>
+      <button v-for="view in views.filter(item => item.id !== 'admin')" :key="view.id" :class="{ active: activeView === view.id }" type="button" @click="activeView = view.id"><AppIcon :name="view.id" /><span>{{ view.short }}</span></button>
     </nav>
   </div>
 </template>
