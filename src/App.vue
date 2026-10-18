@@ -402,7 +402,7 @@ async function loadJson(event) {
             </p>
             <div class="hero-actions">
               <button class="primary-button" type="button" @click="activeView = 'signup'">报名下一场 <AppIcon name="arrow" /></button>
-              <button class="text-button" type="button" @click="activeView = 'matches'">看看最近战绩 ↗</button>
+              <button class="text-button" type="button" @click="activeView = 'matches'">看看最近战绩 <AppIcon name="arrow-up-right" /></button>
             </div>
           </div>
 
@@ -411,7 +411,7 @@ async function loadJson(event) {
             <div class="ticket-lineup blue"><i v-for="n in 5" :key="n"></i></div>
             <div class="ticket-versus"><span>5</span><AppIcon name="cup" /><span>5</span></div>
             <div class="ticket-lineup orange"><i v-for="n in 5" :key="n"></i></div>
-            <div class="ticket-bottom"><span>胜负有时 · 快乐常在</span><b>LET’S PLAY ↗</b></div>
+            <div class="ticket-bottom"><span>胜负有时 · 快乐常在</span><b>LET’S PLAY <AppIcon name="arrow-up-right" /></b></div>
           </div>
         </div>
 
@@ -448,19 +448,19 @@ async function loadJson(event) {
                     <span><small>MVP 次数</small><b>{{ currentCaptains[team.captain].mvp }}</b></span>
                     <span><small>上轮均分</small><b>{{ currentCaptains[team.captain].avgRating.toFixed(1) }}</b></span>
                   </div>
-                  <button class="captain-profile-link" type="button" @click="openPlayer(currentCaptains[team.captain].name)">查看选手战绩 ↗</button>
+                  <button class="captain-profile-link" type="button" @click="openPlayer(currentCaptains[team.captain].name)">查看选手战绩 <AppIcon name="arrow-up-right" /></button>
                   <div class="captain-rank-picker">
                     <label :for="`captain-rank-${team.key}`">替补顺位</label>
                     <select :id="`captain-rank-${team.key}`" v-model.number="captainRanks[team.key]">
                       <option v-for="(candidate, index) in stats.captainSelection[team.candidates]" :key="candidate.name" :value="index">{{ index === 0 ? '首选' : `第 ${index + 1} 顺位` }} · {{ candidate.name }}</option>
                     </select>
-                    <button type="button" :disabled="captainRanks[team.key] >= stats.captainSelection[team.candidates].length - 1" @click="captainRanks[team.key]++">下一顺位 →</button>
+                    <button type="button" :disabled="captainRanks[team.key] >= stats.captainSelection[team.candidates].length - 1" @click="captainRanks[team.key]++">下一顺位 <AppIcon name="arrow" /></button>
                   </div>
                 </template>
                 <div v-else class="captain-pending"><h3>暂无候选人</h3><p>本队暂无可用比赛数据。</p></div>
               </div>
               <details class="captain-reserves">
-                <summary><span>替补队长 · 查看完整顺位</span><span class="reserve-chevron">⌄</span></summary>
+                <summary><span>替补队长 · 查看完整顺位</span><AppIcon name="chevron-down" class="reserve-chevron" /></summary>
                 <ol>
                   <li v-for="(candidate, index) in stats.captainSelection[team.candidates]" :key="candidate.name" :class="{ recommended: currentCaptains?.[team.captain]?.name === candidate.name }">
                     <span class="reserve-order">{{ String(index + 1).padStart(2, '0') }}</span>
@@ -485,14 +485,14 @@ async function loadJson(event) {
             <article class="round-story growth-story">
               <span class="story-icon"><AppIcon name="cup" /></span>
               <div><small>再攒一点能量，下场就发光</small><h3>蓄力之星</h3></div>
-              <div class="story-players"><button v-for="player in stats.latestRoundHighlights.growthStars" :key="player.name" type="button" @click="openPlayer(player.name)">{{ player.name }} ↗</button></div>
+              <div class="story-players"><button v-for="player in stats.latestRoundHighlights.growthStars" :key="player.name" type="button" @click="openPlayer(player.name)">{{ player.name }} <AppIcon name="arrow-up-right" /></button></div>
               <p>上轮综合分最低 · <b>{{ stats.latestRoundHighlights.lowestPowerScore.toFixed(2) }}</b> / 100</p>
               <small class="story-footnote">按当日均分、胜率及 MVP／FMVP 率计算；仅是这一轮的状态。</small>
             </article>
             <article class="round-story teamfight-story">
               <span class="story-icon"><AppIcon name="players" /></span>
               <div><small>这轮先体验，下轮找回节奏</small><h3>团战体验官</h3></div>
-              <div class="story-players"><button v-for="player in stats.latestRoundHighlights.teamfightExplorers" :key="player.name" type="button" @click="openPlayer(player.name)">{{ player.name }} ↗</button><span v-if="!stats.latestRoundHighlights.mostDeaths">全员零阵亡，这轮空缺</span></div>
+              <div class="story-players"><button v-for="player in stats.latestRoundHighlights.teamfightExplorers" :key="player.name" type="button" @click="openPlayer(player.name)">{{ player.name }} <AppIcon name="arrow-up-right" /></button><span v-if="!stats.latestRoundHighlights.mostDeaths">全员零阵亡，这轮空缺</span></div>
               <p>上轮累计阵亡最多 · <b>{{ stats.latestRoundHighlights.mostDeaths }}</b> 次</p>
               <small class="story-footnote">按当日总阵亡次数统计，并列一起上榜；只是朋友间的小彩蛋。</small>
             </article>
@@ -510,7 +510,7 @@ async function loadJson(event) {
         <div class="lane-grid">
           <article v-for="lane in LANES" :key="lane" class="lane-card" :data-lane="lane">
             <header>
-              <span class="lane-symbol">{{ { 对抗: '⚔', 打野: '◆', 法师: '✦', 射手: '⌁', 辅助: '✚' }[lane] }}</span>
+              <span class="lane-symbol"><AppIcon :name="{ 对抗: 'swords', 打野: 'jungle', 法师: 'magic', 射手: 'target', 辅助: 'support' }[lane]" /></span>
               <div><small>LANE RANK</small><h3>{{ lane }}</h3></div>
             </header>
             <button
@@ -530,7 +530,7 @@ async function loadJson(event) {
         <div class="recent-strip">
           <div class="section-heading compact">
             <div><p class="eyebrow">LAST MATCHES</p><h2>最近赛况</h2></div>
-            <button class="text-button" type="button" @click="activeView = 'matches'">全部 {{ stats.overview.matchCount }} 场 →</button>
+            <button class="text-button" type="button" @click="activeView = 'matches'">全部 {{ stats.overview.matchCount }} 场 <AppIcon name="arrow" /></button>
           </div>
           <div class="recent-list">
             <article v-for="match in stats.matches.slice(0, 4)" :key="match.id" class="recent-match">
@@ -588,7 +588,7 @@ async function loadJson(event) {
 
         <div class="boards-grid">
           <article class="leaderboard honor-board">
-            <header><div><small>竞技荣誉 · TOP 10</small><h2>高光时刻</h2></div><span class="medal">✦</span></header>
+            <header><div><small>竞技荣誉 · TOP 10</small><h2>高光时刻</h2></div><span class="medal"><AppIcon name="honors" /></span></header>
             <div class="segmented">
               <button :class="{ active: boardType === 'honor' }" @click="boardType = 'honor'">总荣誉</button>
               <button :class="{ active: boardType === 'mvp' }" @click="boardType = 'mvp'">MVP</button>
@@ -600,7 +600,7 @@ async function loadJson(event) {
           </article>
 
           <article class="leaderboard tea-board">
-            <header><div><small>奶茶江湖 · TOP 10</small><h2>{{ teaBoardType === 'tea' ? '品茶大师' : '大善人' }}</h2></div><span class="medal tea">●</span></header>
+            <header><div><small>奶茶江湖 · TOP 10</small><h2>{{ teaBoardType === 'tea' ? '品茶大师' : '大善人' }}</h2></div><span class="medal tea"><AppIcon name="cup" /></span></header>
             <div class="segmented">
               <button :class="{ active: teaBoardType === 'tea' }" @click="teaBoardType = 'tea'">喝奶茶</button>
               <button :class="{ active: teaBoardType === 'treat' }" @click="teaBoardType = 'treat'">请客</button>
@@ -680,7 +680,7 @@ async function loadJson(event) {
               <label>玩家昵称<input v-model.trim="loginForm.name" autocomplete="username" maxlength="50" placeholder="输入比赛常用昵称" /></label>
               <label>报名 PIN<input v-model="loginForm.pin" :autocomplete="loginForm.new_player ? 'new-password' : 'current-password'" inputmode="numeric" maxlength="12" type="password" placeholder="4—12 位数字" /></label>
               <label class="signup-check"><input v-model="loginForm.new_player" type="checkbox" /><span><b>我是第一次参加</b><small>创建新玩家档案并继续报名</small></span></label>
-              <button type="submit" :disabled="signupLoading"><span>{{ signupLoading ? '身份确认中…' : loginForm.new_player ? '创建档案并进入' : '确认身份，进入战场' }}</span><i>→</i></button>
+              <button type="submit" :disabled="signupLoading"><span>{{ signupLoading ? '身份确认中…' : loginForm.new_player ? '创建档案并进入' : '确认身份，进入战场' }}</span><AppIcon name="arrow" /></button>
             </form>
           </section>
           <div v-else class="signup-session">
@@ -706,18 +706,18 @@ async function loadJson(event) {
               </div>
 
               <div class="event-roster-board">
-                <div class="roster-heading"><span><i>✦</i> 正式席位</span><small>{{ eventRegistrations(event, 'registered').length }} / {{ event.capacity }}</small></div>
+                <div class="roster-heading"><span><AppIcon name="players" />正式席位</span><small>{{ eventRegistrations(event, 'registered').length }} / {{ event.capacity }}</small></div>
                 <div class="roster-grid">
                   <div v-for="(item, index) in eventRegistrations(event, 'registered')" :key="item.id" class="roster-slot occupied" :class="{ mine: isCurrentPlayer(item) }">
                     <span>{{ item.player.name.slice(0, 1) }}</span><b>{{ item.player.name }}</b><small>#{{ String(index + 1).padStart(2, '0') }}</small>
                   </div>
                   <div v-for="slot in Math.max(0, event.capacity - eventRegistrations(event, 'registered').length)" :key="`empty-${slot}`" class="roster-slot empty">
-                    <span>+</span><b>等待选手</b><small>OPEN</small>
+                    <span><AppIcon name="plus" /></span><b>等待选手</b><small>OPEN</small>
                   </div>
                 </div>
 
                 <div class="waitlist-row">
-                  <div class="roster-heading"><span><i>◇</i> 候补队列</span><small>{{ eventRegistrations(event, 'waitlist').length }} / {{ event.waitlist_capacity }}</small></div>
+                  <div class="roster-heading"><span><AppIcon name="signup" />候补队列</span><small>{{ eventRegistrations(event, 'waitlist').length }} / {{ event.waitlist_capacity }}</small></div>
                   <div class="waitlist-players">
                     <span v-for="item in eventRegistrations(event, 'waitlist')" :key="item.id" :class="{ mine: isCurrentPlayer(item) }">{{ item.player.name }}</span>
                     <em v-if="!eventRegistrations(event, 'waitlist').length">当前无人候补</em>
@@ -745,7 +745,7 @@ async function loadJson(event) {
               <div class="event-actions">
                 <div><small>{{ playerSession ? 'YOUR STATUS' : 'PLAYER ACCESS REQUIRED' }}</small><b v-if="playerSession">{{ event.registrations.some(item => isCurrentPlayer(item)) ? '你已在今日名单中' : '今日尚未报名' }}</b><b v-else>登录后即可占领席位</b></div>
                 <div class="event-action-buttons">
-                  <button v-if="playerSession && !event.registrations.some(item => isCurrentPlayer(item))" type="button" :disabled="signupLoading || event.status !== 'open'" @click="registerEvent(event)"><span>{{ eventRegistrations(event, 'registered').length >= event.capacity ? '加入候补队列' : '立即报名，占领席位' }}</span><i>→</i></button>
+                  <button v-if="playerSession && !event.registrations.some(item => isCurrentPlayer(item))" type="button" :disabled="signupLoading || event.status !== 'open'" @click="registerEvent(event)"><span>{{ eventRegistrations(event, 'registered').length >= event.capacity ? '加入候补队列' : '立即报名，占领席位' }}</span><AppIcon name="arrow" /></button>
                   <template v-else-if="playerSession">
                     <button class="rules" type="button" @click="openRulesDialog(event)">{{ playerRegistration(event)?.status === 'registered' && !playerRegistration(event)?.has_decider_vote ? '阅读规则并投票' : '查看赛制与投票' }}</button>
                     <button class="cancel" type="button" :disabled="signupLoading" @click="cancelRegistration(event)">取消今日报名</button>
@@ -757,7 +757,7 @@ async function loadJson(event) {
                 </div>
               </div>
             </article>
-            <div v-if="!signupEvents.length" class="signup-empty"><span>◇</span><b>今日战场正在开启</b><p>场次准备完成后会在这里显示，请稍后刷新页面。</p></div>
+            <div v-if="!signupEvents.length" class="signup-empty"><span><AppIcon name="signup" /></span><b>今日战场正在开启</b><p>场次准备完成后会在这里显示，请稍后刷新页面。</p></div>
           </div>
         </template>
       </section>
@@ -814,7 +814,7 @@ async function loadJson(event) {
               <h2 id="rules-dialog-title">今日比赛规则确认</h2>
               <p>{{ rulesDialogEvent.event_date }} · {{ rulesDialogEvent.title }}</p>
             </div>
-            <button type="button" aria-label="关闭比赛规则" @click="closeRulesDialog">×</button>
+            <button type="button" aria-label="关闭比赛规则" @click="closeRulesDialog"><AppIcon name="close" /></button>
           </header>
 
           <div class="rules-dialog-body">
