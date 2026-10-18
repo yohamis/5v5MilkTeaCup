@@ -137,6 +137,7 @@ export function calculateStats(data) {
 
   const latestMatch = matches[0]
   let captainSelection = null
+  let latestRoundHighlights = null
   if (latestMatch) {
     const sourceDate = latestMatch.date
     const dateRows = rows.filter((row) => row.date === sourceDate)
@@ -146,16 +147,28 @@ export function calculateStats(data) {
       accumulate(datePlayerMap.get(row.name), row, false)
     }
     const datePlayers = [...datePlayerMap.values()].map(finalize)
+    const lowestScore = Math.min(...datePlayers.map((player) => player.powerScore))
+    const mostDeaths = Math.max(...datePlayers.map((player) => player.deaths))
+    latestRoundHighlights = datePlayers.length ? {
+      sourceDate,
+      sourceMatchCount: matches.filter((match) => match.date === sourceDate).length,
+      lowestPowerScore: lowestScore,
+      growthStars: datePlayers.filter((player) => player.powerScore === lowestScore),
+      mostDeaths,
+      teamfightExplorers: mostDeaths > 0 ? datePlayers.filter((player) => player.deaths === mostDeaths) : [],
+    } : null
 
     // 最后比赛日中，品茶选手属于胜方候选，请客选手属于败方候选。
     const captainRanking = (a, b) =>
-      b.mvp + b.fmvp - (a.mvp + a.fmvp) || b.mvp - a.mvp || b.avgRating - a.avgRating
+      b.mvp + b.fmvp - (a.mvp + a.fmvp) || b.mvp - a.mvp ||
+      ratio(b.ratingSum, b.matches) - ratio(a.ratingSum, a.matches) || a.name.localeCompare(b.name, 'zh-CN')
     const winnerCandidates = datePlayers.filter((player) => player.tea > 0).sort(captainRanking)
+    const winnerNames = new Set(winnerCandidates.map((player) => player.name))
     const winnerCaptainSide = ['blue', 'red'].find((side) =>
       latestMatch.teams[side].some((player) => player.name === winnerCandidates[0]?.name),
     )
     const loserCandidates = datePlayers
-      .filter((player) => player.treat > 0 && player.name !== winnerCandidates[0]?.name)
+      .filter((player) => player.treat > 0 && !winnerNames.has(player.name))
       .sort(captainRanking)
     const loserCaptainSide = ['blue', 'red'].find((side) =>
       latestMatch.teams[side].some((player) => player.name === loserCandidates[0]?.name),
@@ -187,6 +200,7 @@ export function calculateStats(data) {
     teaLeaders: leaderboard('tea'),
     treatLeaders: leaderboard('treat'),
     captainSelection,
+    latestRoundHighlights,
     overview: {
       matchCount: matches.length,
       playerCount: players.length,
@@ -194,6 +208,19 @@ export function calculateStats(data) {
       latestDate: matches[0]?.date || '—',
     },
   }
+}
+
+// 只在各自原队伍的候选中递补；未报名与候补席不作为正式队长。
+export function selectAvailableCaptains(selection, registeredNames = null) {
+  if (!selection) return null
+  const registered = registeredNames === null ? null : new Set(registeredNames)
+  const pick = (candidates, excludedName) => {
+    const index = candidates.findIndex((player) => player.name !== excludedName && (!registered || registered.has(player.name)))
+    return index < 0 ? null : { ...candidates[index], successionRank: index + 1 }
+  }
+  const winnerCaptain = pick(selection.winnerCandidates)
+  const loserCaptain = pick(selection.loserCandidates, winnerCaptain?.name)
+  return { winnerCaptain, loserCaptain }
 }
 
 export const formatPercent = (value) => `${round(value * 100, 1)}%`

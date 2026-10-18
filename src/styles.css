@@ -91,6 +91,51 @@ main { width: min(1200px, calc(100% - 48px)); margin: 0 auto; padding-bottom: 48
 .captain-versus span { display: none; }
 .captain-rules { display: flex; gap: 20px; margin-top: 18px; color: #909ab0; font-size: 9px; line-height: 1.8; }
 .captain-rules b { color: #737f98; margin-right: 5px; }
+.captain-controls { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 16px; background: #f7f8fc; border-radius: 12px; }
+.captain-controls label { display: flex; align-items: center; gap: 9px; font-size: 12px; cursor: pointer; }
+.captain-controls input { width: 17px; height: 17px; min-height: 0; accent-color: var(--tea); }
+.captain-controls button { border: 0; background: #ecefff; border-radius: 8px; padding: 9px 12px; font-size: 11px; color: var(--tea); }
+.captain-roster-hint { font-size: 11px; line-height: 1.8; color: var(--muted); margin: 11px 0 18px; }
+.captain-arena.captain-succession-arena { grid-template-columns: 1fr 1fr; align-items: start; gap: 16px; }
+.captain-rank-chip { display: inline-block; margin-left: 10px; vertical-align: middle; padding: 5px 8px; border-radius: 7px; background: #fff9; color: #7484bd; font-size: 10px; font-weight: 500; letter-spacing: 0; }
+.loser-captain .captain-rank-chip { color: #ae7752; }
+.captain-profile-link { border: 0; background: transparent; padding: 0; color: var(--tea); font-size: 11px; }
+.captain-copy .captain-current-state { margin-top: 5px; color: #718d87; }
+.captain-pending { min-height: 163px; padding-top: 12px; }
+.captain-pending h3 { font-size: 23px; }
+.captain-pending p + p { margin-top: 9px; }
+.captain-reserves { border-top: 1px solid #d8deef; margin-top: 10px; }
+.loser-captain .captain-reserves { border-color: #eddbd0; }
+.captain-reserves summary { display: flex; justify-content: space-between; align-items: center; gap: 10px; list-style: none; min-height: 48px; font-size: 12px; cursor: pointer; }
+.captain-reserves summary::-webkit-details-marker { display: none; }
+.reserve-chevron { font-size: 20px; color: #9aa6c7; }
+.captain-reserves[open] .reserve-chevron { transform: rotate(180deg); }
+.captain-reserves ol { margin: 0; padding: 0; list-style: none; }
+.captain-reserves li { display: grid; grid-template-columns: 20px 1fr auto; align-items: center; gap: 9px; padding: 9px 7px; border-bottom: 1px solid #dce2f166; border-radius: 8px; }
+.captain-reserves li.recommended { background: #ffffffa6; }
+.reserve-order { color: #97a2bf; font: italic 700 12px Arial, sans-serif; }
+.captain-reserves li button { min-width: 0; text-align: left; border: 0; padding: 5px 0; background: none; }
+.captain-reserves li b, .captain-reserves li small { display: block; }
+.captain-reserves li b { font-size: 12px; }
+.captain-reserves li small { font-size: 10px; margin-top: 5px; color: var(--muted); }
+.reserve-status { font-size: 10px; color: #929bb1; white-space: nowrap; }
+.reserve-status.registered { color: #528c77; }
+.captain-reserves > p { margin: 12px 0 0; color: var(--muted); line-height: 1.8; font-size: 10px; }
+.round-stories { margin-bottom: 30px; }
+.round-story-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.round-story { display: grid; grid-template-columns: 42px 1fr; align-items: center; gap: 10px 13px; background: #fff; border-radius: 18px; padding: 23px; }
+.story-icon { display: grid; place-items: center; width: 42px; height: 46px; border-radius: 14px; background: #eef4ff; color: #8b9ac5; }
+.story-icon svg { width: 25px; height: 25px; }
+.teamfight-story .story-icon { background: #eef7f3; color: #7ba995; }
+.round-story h3 { font-size: 19px; margin: 5px 0 0; }
+.round-story > div > small { font-size: 10px; color: #8995ad; }
+.story-players { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 5px; }
+.story-players button { background: #f6f8fc; border: 0; border-radius: 9px; padding: 9px 12px; font-size: 13px; font-weight: 600; }
+.story-players > span { font-size: 12px; color: var(--muted); padding-block: 12px; }
+.round-story > p, .story-footnote { grid-column: 1 / -1; }
+.round-story > p { margin: 3px 0 0; font-size: 12px; color: #8995ad; }
+.round-story > p b { color: #7182ae; font: 700 21px Arial, sans-serif; }
+.story-footnote { color: #8d98ac; line-height: 1.8; font-size: 10px; }
 .section-heading { margin-top: 30px; }
 .lane-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
 .lane-card { padding: 18px 16px 8px; background: #fff; border-radius: 18px; }
@@ -401,6 +446,21 @@ select, input:not([type=checkbox]):not([type=radio]), textarea { border: 1px sol
   .roster-slot > span { grid-row: auto; }
 }
 @media (max-width: 700px) {
+  .captain-controls { flex-wrap: wrap; padding: 12px; gap: 7px; }
+  .captain-controls label { font-size: 11px; }
+  .captain-controls button { min-height: 36px; font-size: 10px; margin-left: 24px; }
+  .captain-roster-hint { font-size: 10px; }
+  .captain-arena.captain-succession-arena { grid-template-columns: 1fr; gap: 12px; }
+  .captain-succession-arena .captain-card { padding: 17px; }
+  .captain-succession-arena .captain-copy small { font-size: 10px; }
+  .captain-succession-arena .captain-copy h3 { font-size: 27px; }
+  .captain-succession-arena .captain-stats small { font-size: 10px; }
+  .captain-succession-arena .captain-stats b { font-size: 23px; }
+  .captain-pending { min-height: 115px; }
+  .captain-reserves li { gap: 7px; padding-inline: 3px; }
+  .captain-reserves li small { font-size: 9px; }
+  .round-story-grid { grid-template-columns: 1fr; gap: 12px; }
+  .round-story { padding: 20px; }
   body { font-size: 13px; }
   .app-shell { padding-bottom: calc(70px + env(safe-area-inset-bottom)); }
   .topbar { height: 74px; padding: 0 20px; background: var(--paper); border: 0; }
