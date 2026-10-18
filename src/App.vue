@@ -464,7 +464,7 @@ async function loadJson(event) {
                 <ol>
                   <li v-for="(candidate, index) in stats.captainSelection[team.candidates]" :key="candidate.name" :class="{ recommended: currentCaptains?.[team.captain]?.name === candidate.name }">
                     <span class="reserve-order">{{ String(index + 1).padStart(2, '0') }}</span>
-                    <button type="button" @click="openPlayer(candidate.name)"><b>{{ candidate.name }}</b><small>荣誉 {{ candidate.mvp + candidate.fmvp }} · MVP {{ candidate.mvp }} · 均分 {{ candidate.avgRating.toFixed(1) }}</small></button>
+                    <button type="button" @click="openPlayer(candidate.name)"><b>{{ candidate.name }}</b><small>总荣誉 {{ candidate.mvp + candidate.fmvp }} · MVP {{ candidate.mvp }} · 均分 {{ candidate.avgRating.toFixed(1) }}</small></button>
                     <span class="reserve-status">{{ index === 0 ? '首选' : `替补 ${index}` }}</span>
                   </li>
                 </ol>
