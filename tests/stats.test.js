@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { calculateStats, selectAvailableCaptains } from '../src/lib/stats.js'
+import { calculateStats, selectCaptainsByRank } from '../src/lib/stats.js'
 
 const player = (name, extra = {}) => ({ name, lane: '辅助', rating: 8, kills: 2, deaths: 2, assists: 4, mvp: false, fmvp: false, tea: false, treat: false, ...extra })
 const match = (date, round, blue = [], red = []) => ({ id: `${date}-${round}`, date, round, winner: 'blue', teams: { blue, red } })
@@ -19,12 +19,12 @@ test('captains use latest match date only and prefer total MVP plus FMVP', () =>
   assert.equal(result.winnerCandidates.some((item) => item.name === '历史冠军'), false)
 })
 
-test('equal total honors compare MVP count before average rating', () => {
+test('equal total honors compare average rating directly, not MVP count', () => {
   const result = selection([
     player('高均分', { tea: true, fmvp: true, rating: 14 }),
     player('高MVP', { tea: true, mvp: true, rating: 7 }),
   ], [player('对手', { treat: true })])
-  assert.equal(result.winnerCaptain.name, '高MVP')
+  assert.equal(result.winnerCaptain.name, '高均分')
 })
 
 test('equal honors and MVP use actual unrounded daily rating average', () => {
@@ -35,20 +35,21 @@ test('equal honors and MVP use actual unrounded daily rating average', () => {
   assert.equal(result.winnerCaptain.name, '阿乙')
 })
 
-test('registration-based succession skips absent candidates and stays in its own team', () => {
+test('manual succession uses original teams and does not require matching registration names', () => {
   const result = selection([
     player('蓝首选', { tea: true, mvp: true }),
     player('蓝替补', { tea: true, rating: 7 }),
   ], [player('红首选', { treat: true, fmvp: true }), player('红替补', { treat: true, rating: 7 })])
-  const available = selectAvailableCaptains(result, ['蓝替补', '红替补'])
+  const available = selectCaptainsByRank(result, { winner: 1, loser: 1 })
   assert.equal(available.winnerCaptain.name, '蓝替补')
   assert.equal(available.winnerCaptain.successionRank, 2)
   assert.equal(available.loserCaptain.name, '红替补')
   assert.equal(available.loserCaptain.successionRank, 2)
-  const oneSideOnly = selectAvailableCaptains(result, ['蓝替补'])
-  assert.equal(oneSideOnly.loserCaptain, null)
-  assert.equal(selectAvailableCaptains(result, []).winnerCaptain, null)
-  assert.equal(selectAvailableCaptains(result).winnerCaptain.name, '蓝首选')
+  const oneSideOnly = selectCaptainsByRank(result, { winner: 1 })
+  assert.equal(oneSideOnly.loserCaptain.name, '红首选')
+  assert.equal(selectCaptainsByRank(result).winnerCaptain.name, '蓝首选')
+  assert.equal(selectCaptainsByRank(result, { winner: 99 }).winnerCaptain.name, '蓝替补')
+  assert.equal(selectCaptainsByRank(result, { winner: -1 }).winnerCaptain.name, '蓝首选')
 })
 
 test('overlapping tea/treat flags cannot assign a player to both candidate teams', () => {
@@ -73,7 +74,7 @@ test('latest-day highlights use daily power score and total deaths with all ties
 
 test('highlights are empty with no matches and zero-death day has no death label winner', () => {
   assert.equal(calculateStats({ matches: [] }).latestRoundHighlights, null)
-  assert.equal(selectAvailableCaptains(null), null)
+  assert.equal(selectCaptainsByRank(null), null)
   const result = calculateStats({ matches: [match('2026-10-17', 'A1', [player('零阵亡', { deaths: 0 })], [])] })
   assert.deepEqual(result.latestRoundHighlights.teamfightExplorers, [])
   assert.equal(calculateStats({ matches: [match('2026-10-17', 'A1')] }).latestRoundHighlights, null)

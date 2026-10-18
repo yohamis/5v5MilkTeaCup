@@ -2,7 +2,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import AppIcon from './components/AppIcon.vue'
 import initialData from './data/tournament.json'
-import { calculateStats, formatDate, formatPercent, LANES, selectAvailableCaptains, validateData } from './lib/stats'
+import { calculateStats, formatDate, formatPercent, LANES, selectCaptainsByRank, validateData } from './lib/stats'
 
 const activeView = ref('overview')
 const tournament = ref(initialData)
@@ -14,8 +14,7 @@ const teaBoardType = ref('tea')
 const selectedPlayerName = ref('')
 const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
 const signupEvents = ref([])
-const captainsFromSignup = ref(true)
-const captainRefreshLoading = ref(false)
+const captainRanks = ref({ winner: 0, loser: 0 })
 const signupMessage = ref('')
 const signupLoading = ref(false)
 const rulesDialogOpen = ref(false)
@@ -100,34 +99,15 @@ const teaBoard = computed(() =>
   teaBoardType.value === 'tea' ? stats.value.teaLeaders : stats.value.treatLeaders,
 )
 const primarySignupEvent = computed(() => signupEvents.value[0] || null)
-const todaySignupEvent = computed(() => {
-  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date())
-  return signupEvents.value.find((event) => event.event_date === today) || null
-})
 const captainTeams = [
   { key: 'winner', title: '胜方', candidates: 'winnerCandidates', captain: 'winnerCaptain', description: '上一轮品茶队伍' },
   { key: 'loser', title: '败方', candidates: 'loserCandidates', captain: 'loserCaptain', description: '上一轮请客队伍' },
 ]
-const currentCaptains = computed(() => captainsForEvent(todaySignupEvent.value))
-const dialogCaptains = computed(() => captainsForEvent(rulesDialogEvent.value))
-
-function captainsForEvent(event) {
-  const names = captainsFromSignup.value && event
-    ? event.registrations.filter((item) => item.status === 'registered').map((item) => item.player.name)
-    : null
-  return selectAvailableCaptains(stats.value.captainSelection, names)
-}
-
-function captainSignupStatus(name) {
-  if (!todaySignupEvent.value) return '名单未获取'
-  const item = todaySignupEvent.value.registrations.find((registration) => registration.player.name === name)
-  return item?.status === 'registered' ? '已报名' : item?.status === 'waitlist' ? '候补中' : '未报名'
-}
-
-async function refreshCaptainRoster() {
-  captainRefreshLoading.value = true
-  try { await loadBackend() } finally { captainRefreshLoading.value = false }
-}
+const currentCaptains = computed(() => selectCaptainsByRank(stats.value.captainSelection, captainRanks.value))
+const dialogCaptains = computed(() => currentCaptains.value)
+watch(() => stats.value.captainSelection?.referenceMatchId, () => {
+  captainRanks.value = { winner: 0, loser: 0 }
+})
 
 function eventRegistrations(event, status) {
   return event.registrations.filter((item) => item.status === status)
@@ -451,28 +431,33 @@ async function loadJson(event) {
           </div>
 
           <div class="captain-controls">
-            <label><input v-model="captainsFromSignup" type="checkbox" :disabled="!todaySignupEvent" /><span>只从今日正式报名选手中推荐</span></label>
-            <button v-if="apiBase" type="button" :disabled="captainRefreshLoading" @click="refreshCaptainRoster">{{ captainRefreshLoading ? '更新中…' : '刷新报名名单' }}</button>
+            <span>按上一轮原队伍顺位递补</span>
+            <button type="button" @click="captainRanks = { winner: 0, loser: 0 }">恢复双方首选</button>
           </div>
-          <p class="captain-roster-hint">{{ todaySignupEvent ? (captainsFromSignup ? `依据 ${todaySignupEvent.event_date} 正式名单顺位递补；候补选手转正后参与。` : '当前查看上一轮完整顺位，未按今日报名筛选。') : '尚未获取今日报名名单，暂展示上一轮首选及完整替补顺位。' }}</p>
-          <p v-if="signupMessage.startsWith('后端连接失败')" class="notice notice-error" role="status">报名名单更新失败，当前推荐可能不是最新状态，请稍后刷新。</p>
+          <p class="captain-roster-hint">不关联报名昵称。首选无法参赛时，可手动查看本队下一顺位；切换仅供本机预览，不代表全站已确定队长。</p>
 
           <div class="captain-arena captain-succession-arena" aria-live="polite">
             <article v-for="team in captainTeams" :key="team.key" :class="['captain-card', `${team.key}-captain` ]">
               <div class="captain-copy">
                 <small>{{ team.title }}队长 · {{ team.description }}</small>
                 <template v-if="currentCaptains?.[team.captain]">
-                  <h3>{{ currentCaptains[team.captain].name }}<span class="captain-rank-chip">{{ currentCaptains[team.captain].successionRank === 1 ? '首选' : `第 ${currentCaptains[team.captain].successionRank} 顺位递补` }}</span></h3>
+                  <h3>{{ currentCaptains[team.captain].name }}<span class="captain-rank-chip">{{ currentCaptains[team.captain].successionRank === 1 ? '首选' : `第 ${currentCaptains[team.captain].successionRank} 顺位 · 预览` }}</span></h3>
                   <p>上轮首选：{{ stats.captainSelection[team.candidates][0].name }}</p>
-                  <p class="captain-current-state">本次人选 · {{ captainSignupStatus(currentCaptains[team.captain].name) }}</p>
                   <div class="captain-stats">
                     <span><small>MVP＋FMVP</small><b>{{ currentCaptains[team.captain].mvp + currentCaptains[team.captain].fmvp }}</b></span>
                     <span><small>MVP 次数</small><b>{{ currentCaptains[team.captain].mvp }}</b></span>
                     <span><small>上轮均分</small><b>{{ currentCaptains[team.captain].avgRating.toFixed(1) }}</b></span>
                   </div>
                   <button class="captain-profile-link" type="button" @click="openPlayer(currentCaptains[team.captain].name)">查看选手战绩 ↗</button>
+                  <div class="captain-rank-picker">
+                    <label :for="`captain-rank-${team.key}`">替补顺位</label>
+                    <select :id="`captain-rank-${team.key}`" v-model.number="captainRanks[team.key]">
+                      <option v-for="(candidate, index) in stats.captainSelection[team.candidates]" :key="candidate.name" :value="index">{{ index === 0 ? '首选' : `第 ${index + 1} 顺位` }} · {{ candidate.name }}</option>
+                    </select>
+                    <button type="button" :disabled="captainRanks[team.key] >= stats.captainSelection[team.candidates].length - 1" @click="captainRanks[team.key]++">下一顺位 →</button>
+                  </div>
                 </template>
-                <div v-else class="captain-pending"><h3>等待队员报名</h3><p>本队暂无正式报名的候选人，不会从另一队借选队长。</p><p>上轮首选：{{ stats.captainSelection[team.candidates][0].name }}</p></div>
+                <div v-else class="captain-pending"><h3>暂无候选人</h3><p>本队暂无可用比赛数据。</p></div>
               </div>
               <details class="captain-reserves">
                 <summary><span>替补队长 · 查看完整顺位</span><span class="reserve-chevron">⌄</span></summary>
@@ -480,17 +465,17 @@ async function loadJson(event) {
                   <li v-for="(candidate, index) in stats.captainSelection[team.candidates]" :key="candidate.name" :class="{ recommended: currentCaptains?.[team.captain]?.name === candidate.name }">
                     <span class="reserve-order">{{ String(index + 1).padStart(2, '0') }}</span>
                     <button type="button" @click="openPlayer(candidate.name)"><b>{{ candidate.name }}</b><small>荣誉 {{ candidate.mvp + candidate.fmvp }} · MVP {{ candidate.mvp }} · 均分 {{ candidate.avgRating.toFixed(1) }}</small></button>
-                    <span :class="['reserve-status', { registered: captainSignupStatus(candidate.name) === '已报名' }]">{{ captainSignupStatus(candidate.name) }}</span>
+                    <span class="reserve-status">{{ index === 0 ? '首选' : `替补 ${index}` }}</span>
                   </li>
                 </ol>
-                <p>首选缺席时，选择本队下一位已正式报名的选手；排序完全相同则按昵称稳定排列。</p>
+                <p>MVP＋FMVP 总次数优先，相同再比上轮均分；全部相同则按昵称稳定排列。</p>
               </details>
             </article>
           </div>
 
           <div class="captain-rules">
-            <span><b>胜方规则</b> 最后比赛日品茶选手 → MVP+FMVP 次数 → MVP 次数 → 当日平均评分</span>
-            <span><b>败方规则</b> 最后比赛日请客选手 → MVP+FMVP 次数 → MVP 次数 → 当日平均评分</span>
+            <span><b>胜方规则</b> 最后比赛日品茶选手 → MVP+FMVP 次数 → 当日平均评分</span>
+            <span><b>败方规则</b> 最后比赛日请客选手 → MVP+FMVP 次数 → 当日平均评分</span>
           </div>
         </section>
 
@@ -842,16 +827,17 @@ async function loadJson(event) {
                 如果今天沿用最近比赛日 {{ stats.captainSelection.sourceDate }} 的分队结果，上轮败方在第一局进入蓝色方并先手选英雄。
               </p>
               <p v-else class="rule-explainer">当前没有可引用的上一轮比赛结果，双方队长与第一局蓝色方需在开赛前现场确认。</p>
+              <p v-if="captainRanks.winner || captainRanks.loser" class="rule-explainer">以下为本机手动切换的替补顺位预览，实际队长请在开赛前确认。</p>
               <div v-if="stats.captainSelection" class="captain-order-grid">
                 <article>
                   <small>上轮胜方队长</small>
-                  <b>{{ dialogCaptains?.winnerCaptain?.name || '等待本队报名' }}</b>
+                  <b>{{ dialogCaptains?.winnerCaptain?.name || '暂无候选人' }}</b>
                   <span>守擂方</span>
                 </article>
                 <i>VS</i>
                 <article class="blue-first">
                   <small>上轮败方队长</small>
-                  <b>{{ dialogCaptains?.loserCaptain?.name || '等待本队报名' }}</b>
+                  <b>{{ dialogCaptains?.loserCaptain?.name || '暂无候选人' }}</b>
                   <span>首局蓝方 · 先手</span>
                 </article>
               </div>

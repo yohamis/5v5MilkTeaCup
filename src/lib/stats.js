@@ -160,7 +160,7 @@ export function calculateStats(data) {
 
     // 最后比赛日中，品茶选手属于胜方候选，请客选手属于败方候选。
     const captainRanking = (a, b) =>
-      b.mvp + b.fmvp - (a.mvp + a.fmvp) || b.mvp - a.mvp ||
+      b.mvp + b.fmvp - (a.mvp + a.fmvp) ||
       ratio(b.ratingSum, b.matches) - ratio(a.ratingSum, a.matches) || a.name.localeCompare(b.name, 'zh-CN')
     const winnerCandidates = datePlayers.filter((player) => player.tea > 0).sort(captainRanking)
     const winnerNames = new Set(winnerCandidates.map((player) => player.name))
@@ -210,16 +210,16 @@ export function calculateStats(data) {
   }
 }
 
-// 只在各自原队伍的候选中递补；未报名与候补席不作为正式队长。
-export function selectAvailableCaptains(selection, registeredNames = null) {
+// 只按原队伍的统计顺位选择，不使用报名昵称匹配。
+export function selectCaptainsByRank(selection, ranks = {}) {
   if (!selection) return null
-  const registered = registeredNames === null ? null : new Set(registeredNames)
-  const pick = (candidates, excludedName) => {
-    const index = candidates.findIndex((player) => player.name !== excludedName && (!registered || registered.has(player.name)))
-    return index < 0 ? null : { ...candidates[index], successionRank: index + 1 }
+  const pick = (candidates, rank = 0) => {
+    if (!candidates.length) return null
+    const index = Math.min(candidates.length - 1, Number.isInteger(rank) && rank >= 0 ? rank : 0)
+    return { ...candidates[index], successionRank: index + 1 }
   }
-  const winnerCaptain = pick(selection.winnerCandidates)
-  const loserCaptain = pick(selection.loserCandidates, winnerCaptain?.name)
+  const winnerCaptain = pick(selection.winnerCandidates, ranks.winner)
+  const loserCaptain = pick(selection.loserCandidates, ranks.loser)
   return { winnerCaptain, loserCaptain }
 }
 
