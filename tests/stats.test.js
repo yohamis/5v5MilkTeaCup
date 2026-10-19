@@ -87,3 +87,24 @@ test('complete sorting ties keep the same captain order when input order changes
   const reversed = selection([...candidates].reverse(), otherTeam).winnerCandidates.map((item) => item.name)
   assert.deepEqual(first, reversed)
 })
+
+test('underdog captains use lowest daily average then most total deaths with blue first', () => {
+  const result = calculateStats({ matches: [
+    match('2026-10-16', 'A1', [player('历史低分', { rating: 0, deaths: 99 })], []),
+    match('2026-10-17', 'A1', [player('低分甲', { rating: 4, deaths: 3 }), player('中途离场', { rating: 0, deaths: 99 })], [player('低分乙', { rating: 4, deaths: 8 })]),
+    match('2026-10-17', 'A2', [player('低分甲', { rating: 6, deaths: 2 })], [player('低分乙', { rating: 6, deaths: 1 }), player('其他人', { rating: 8 })]),
+  ] }).underdogSelection
+  assert.equal(result.winnerCaptain.name, '低分乙')
+  assert.equal(result.loserCaptain.name, '低分甲')
+  assert.equal(result.winnerCaptain.deaths, 9)
+  assert.equal(result.winnerCaptain.avgRating, 5)
+  assert.equal(result.winnerCandidates.some((item) => ['历史低分', '中途离场'].includes(item.name)), false)
+  const chosen = selectCaptainsByRank(result, { winner: 1, loser: 1 }, true)
+  assert.notEqual(chosen.winnerCaptain.name, chosen.loserCaptain.name)
+})
+
+test('underdog rating priority beats deaths and no second player means no mode', () => {
+  const result = calculateStats({ matches: [match('2026-10-17', 'A1', [player('均分更低', { rating: 3, deaths: 1 })], [player('阵亡更多', { rating: 4, deaths: 30 })])] }).underdogSelection
+  assert.equal(result.winnerCaptain.name, '均分更低')
+  assert.equal(calculateStats({ matches: [match('2026-10-17', 'A1', [player('单人')])] }).underdogSelection, null)
+})

@@ -138,6 +138,7 @@ export function calculateStats(data) {
   const latestMatch = matches[0]
   let captainSelection = null
   let latestRoundHighlights = null
+  let underdogSelection = null
   if (latestMatch) {
     const sourceDate = latestMatch.date
     const dateRows = rows.filter((row) => row.date === sourceDate)
@@ -147,6 +148,21 @@ export function calculateStats(data) {
       accumulate(datePlayerMap.get(row.name), row, false)
     }
     const datePlayers = [...datePlayerMap.values()].map(finalize)
+    const lastRoster = new Set(['blue', 'red'].flatMap((side) => (latestMatch.teams[side] || []).map((player) => player.name)))
+    const underdogCandidates = datePlayers.filter((player) => lastRoster.has(player.name)).sort((a, b) =>
+      ratio(a.ratingSum, a.matches) - ratio(b.ratingSum, b.matches) || b.deaths - a.deaths || a.name.localeCompare(b.name, 'zh-CN'),
+    )
+    if (underdogCandidates.length >= 2) {
+      underdogSelection = {
+        sourceDate,
+        sourceMatchCount: matches.filter((match) => match.date === sourceDate).length,
+        referenceMatchId: latestMatch.id,
+        winnerCandidates: underdogCandidates,
+        loserCandidates: underdogCandidates,
+        winnerCaptain: underdogCandidates[0],
+        loserCaptain: underdogCandidates[1],
+      }
+    }
     const lowestScore = Math.min(...datePlayers.map((player) => player.powerScore))
     const mostDeaths = Math.max(...datePlayers.map((player) => player.deaths))
     latestRoundHighlights = datePlayers.length ? {
@@ -200,6 +216,7 @@ export function calculateStats(data) {
     teaLeaders: leaderboard('tea'),
     treatLeaders: leaderboard('treat'),
     captainSelection,
+    underdogSelection,
     latestRoundHighlights,
     overview: {
       matchCount: matches.length,
@@ -211,7 +228,7 @@ export function calculateStats(data) {
 }
 
 // 只按原队伍的统计顺位选择，不使用报名昵称匹配。
-export function selectCaptainsByRank(selection, ranks = {}) {
+export function selectCaptainsByRank(selection, ranks = {}, distinct = false) {
   if (!selection) return null
   const pick = (candidates, rank = 0) => {
     if (!candidates.length) return null
@@ -219,7 +236,11 @@ export function selectCaptainsByRank(selection, ranks = {}) {
     return { ...candidates[index], successionRank: index + 1 }
   }
   const winnerCaptain = pick(selection.winnerCandidates, ranks.winner)
-  const loserCaptain = pick(selection.loserCandidates, ranks.loser)
+  let loserCaptain = pick(selection.loserCandidates, ranks.loser)
+  if (distinct && loserCaptain?.name === winnerCaptain?.name) {
+    const index = selection.loserCandidates.findIndex((player) => player.name !== winnerCaptain.name)
+    loserCaptain = index < 0 ? null : { ...selection.loserCandidates[index], successionRank: index + 1 }
+  }
   return { winnerCaptain, loserCaptain }
 }
 

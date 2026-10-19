@@ -99,6 +99,9 @@ main { width: min(1200px, calc(100% - 48px)); margin: 0 auto; padding-bottom: 48
 .captain-controls input { width: 17px; height: 17px; min-height: 0; accent-color: var(--tea); }
 .captain-controls button { border: 0; background: #ecefff; border-radius: 8px; padding: 9px 12px; font-size: 11px; color: var(--tea); }
 .captain-controls > span { font-size: 12px; }
+.captain-mode-tabs { max-width: 420px; margin: 0 0 17px; }
+.captain-publish-link { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 11px; background: #eef1ff; color: #687bc3; font-size: 12px; padding: 11px 15px; margin-top: 18px; }
+.captain-publish-link .ui-icon { width: 16px; height: 16px; }
 .captain-rank-picker { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; margin: 14px 0 5px; }
 .captain-rank-picker label { grid-column: 1 / -1; font-size: 11px; color: var(--muted); }
 .captain-rank-picker select { width: 100%; background-color: #ffffffa8; font-size: 12px; min-height: 42px; }
