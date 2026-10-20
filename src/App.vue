@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import AppIcon from './components/AppIcon.vue'
 import TeamPublisher from './components/TeamPublisher.vue'
+import ModeWheel from './components/ModeWheel.vue'
 import initialData from './data/tournament.json'
 import { calculateStats, formatDate, formatPercent, LANES, selectCaptainsByRank, validateData } from './lib/stats'
 
@@ -434,6 +435,8 @@ async function loadJson(event) {
 
         <div class="season-summary"><div><b>{{ stats.overview.matchCount }}</b><span>场精彩对局</span></div><div><b>{{ stats.overview.playerCount }}</b><span>位参赛好友</span></div><div><b>{{ stats.overview.recordCount }}</b><span>条高光记录</span></div><small>战报更新至 {{ stats.overview.latestDate }}</small></div>
         <div class="quick-links"><button v-for="view in views.filter(item => ['matches', 'honors', 'players', 'signup'].includes(item.id))" :key="view.id" type="button" @click="activeView = view.id"><span><AppIcon :name="view.id" /></span><b>{{ view.label }}</b><small>{{ {matches: '每场都值得回味', honors: '看看谁是 MVP', players: '发现你的拿手分路', signup: '下一场等你来'}[view.id] }}</small></button></div>
+
+        <ModeWheel />
 
         <section v-if="stats.captainSelection || stats.underdogSelection" class="captain-section">
           <div class="captain-heading">
